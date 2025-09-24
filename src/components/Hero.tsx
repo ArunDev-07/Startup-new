@@ -11,7 +11,7 @@ const Hero: React.FC = () => {
   }, []);
 
   // Public folder paths (leading slash)
-  const VIDEO_SRC = '/Videos/Iot_Compressed.mp4';
+  const VIDEO_SRC = './public/Videos/Iot_Compressed.mp4';
   const VIDEO_POSTER = '/images/video-poster.jpg';
 
   return (
