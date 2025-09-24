@@ -11,8 +11,10 @@ const Hero: React.FC = () => {
   }, []);
 
   // Public folder paths (leading slash)
-  const VIDEO_SRC = './public/Videos/Iot_Compressed.mp4';
-  const VIDEO_POSTER = '/images/video-poster.jpg';
+ // Public folder paths (leading slash)
+const VIDEO_SRC = '/Videos/Iot_Compressed.mp4';
+const VIDEO_POSTER = '/images/video-poster.jpg';
+
 
   return (
     <section className="relative min-h-screen flex items-center pt-16 lg:pt-20 overflow-hidden">
@@ -94,19 +96,20 @@ const Hero: React.FC = () => {
               <div className="relative rounded-lg overflow-hidden shadow-2xl w-full max-w-[700px]">
                 {/* Autoplaying, muted, looping video from public/videos */}
                 <video
-                  src={VIDEO_SRC}
-                  poster={VIDEO_POSTER}
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  preload="auto"
-                  controls={false}
-                  className="w-full h-auto object-cover block"
-                  aria-label="Demo video"
-                >
-                  Your browser does not support the video tag.
-                </video>
+  src={VIDEO_SRC}
+  poster={VIDEO_POSTER}
+  autoPlay
+  loop
+  muted
+  playsInline
+  preload="auto"
+  controls={false}
+  className="w-full h-auto object-cover block"
+  aria-label="Demo video"
+>
+  Your browser does not support the video tag.
+</video>
+
               </div>
             </div>
 

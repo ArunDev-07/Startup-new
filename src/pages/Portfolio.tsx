@@ -184,14 +184,18 @@ const Portfolio: React.FC = () => {
           {/* Right: Autoplaying video */}
           <div className="aspect-video rounded-lg overflow-hidden bg-black shadow-lg">
             {/* Replace src with your hosted mp4/webm. muted & playsInline are required for autoplay on most browsers */}
-            <video
-              src="./public/Videos/video-main.mp4"
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="w-full h-full object-cover"
-            />
+           <video
+  src="/Videos/video-main.mp4"
+  autoPlay
+  loop
+  muted
+  playsInline
+  preload="auto"
+  className="w-full h-full object-cover"
+>
+  Your browser does not support the video tag.
+</video>
+
           </div>
         </div>
       </section>
