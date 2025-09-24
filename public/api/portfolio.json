@@ -1,0 +1,165 @@
+{
+  "lastUpdated": "2025-01-27",
+  "totalProjects": 12,
+  "projects": [
+    {
+      "id": "genomeviz-pro",
+      "title": "GenomeViz Pro",
+      "category": "biology",
+      "client": "Stanford University",
+      "year": "2024",
+      "description": "Interactive genome browser for Stanford's genomics research team with real-time data visualization, collaborative annotation tools, and advanced search capabilities for genetic research.",
+      "image": "https://images.pexels.com/photos/3825417/pexels-photo-3825417.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+      "technologies": ["React", "D3.js", "WebGL", "Node.js", "MongoDB", "Docker", "AWS"],
+      "features": [
+        "Real-time genome browsing",
+        "Collaborative annotations",
+        "Advanced search and filtering", 
+        "Export to multiple formats",
+        "Integration with public databases"
+      ],
+      "liveUrl": "https://genomeviz-demo.sagittarius.ai",
+      "githubUrl": "https://github.com/sagittarius/genomeviz",
+      "featured": true,
+      "metrics": {
+        "users": "500+",
+        "dataProcessed": "2TB+",
+        "performance": "99.9% uptime"
+      }
+    },
+    {
+      "id": "chemlab-analytics", 
+      "title": "ChemLab Analytics",
+      "category": "chemistry",
+      "client": "MIT Chemistry Department",
+      "year": "2024",
+      "description": "Comprehensive chemical analysis platform for MIT's chemistry department with molecular modeling, reaction pathway visualization, and spectral data integration.",
+      "image": "https://images.pexels.com/photos/2280547/pexels-photo-2280547.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+      "technologies": ["Vue.js", "Three.js", "RDKit", "Python", "PostgreSQL", "Redis", "GraphQL"],
+      "features": [
+        "3D molecular visualization",
+        "Reaction mechanism modeling",
+        "Spectral data analysis",
+        "Chemical property prediction",
+        "Lab equipment integration"
+      ],
+      "liveUrl": "https://chemlab-demo.sagittarius.ai",
+      "featured": true,
+      "metrics": {
+        "molecules": "10,000+",
+        "reactions": "5,000+", 
+        "accuracy": "95%"
+      }
+    },
+    {
+      "id": "quantum-simulator",
+      "title": "Quantum Simulator Hub", 
+      "category": "physics",
+      "client": "CERN",
+      "year": "2024",
+      "description": "Advanced quantum physics simulation platform for CERN with real-time particle interaction modeling, collaborative research tools, and high-performance computing integration.",
+      "image": "https://images.pexels.com/photos/8674530/pexels-photo-8674530.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+      "technologies": ["Next.js", "WebAssembly", "TensorFlow.js", "WebGL", "Redis", "HPC Integration"],
+      "features": [
+        "Quantum circuit simulation",
+        "Real-time visualization",
+        "Collaborative research environment",
+        "HPC cluster integration",
+        "Advanced mathematical rendering"
+      ],
+      "liveUrl": "https://quantum-demo.sagittarius.ai", 
+      "githubUrl": "https://github.com/sagittarius/quantum-sim",
+      "featured": true,
+      "metrics": {
+        "simulations": "1M+",
+        "researchers": "200+",
+        "computeTime": "10,000 hours"
+      }
+    },
+    {
+      "id": "biodata-portal",
+      "title": "BioData Portal",
+      "category": "biology", 
+      "client": "Harvard Medical School",
+      "year": "2023",
+      "description": "Centralized research data management system for Harvard Medical School with automated data processing, visualization, and secure collaboration features.",
+      "image": "https://images.pexels.com/photos/3938023/pexels-photo-3938023.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+      "technologies": ["React", "GraphQL", "Python", "ElasticSearch", "Docker", "Kubernetes"],
+      "features": [
+        "Automated data processing",
+        "Advanced search capabilities", 
+        "Secure data sharing",
+        "Real-time collaboration",
+        "Compliance management"
+      ],
+      "liveUrl": "https://biodata-demo.sagittarius.ai",
+      "featured": false,
+      "metrics": {
+        "datasets": "500+",
+        "storage": "5TB+",
+        "users": "150+"
+      }
+    },
+    {
+      "id": "molecular-designer",
+      "title": "Molecular Designer",
+      "category": "chemistry",
+      "client": "Pharmaceutical Research Institute", 
+      "year": "2023",
+      "description": "AI-powered molecular design tool for pharmaceutical research with predictive modeling, drug discovery capabilities, and automated optimization algorithms.",
+      "image": "https://images.pexels.com/photos/3825328/pexels-photo-3825328.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+      "technologies": ["Angular", "TensorFlow.js", "WebGL", "Flask", "MongoDB", "ML Pipeline"],
+      "features": [
+        "AI-powered drug design",
+        "Molecular property prediction",
+        "Optimization algorithms", 
+        "3D molecular visualization",
+        "Research collaboration tools"
+      ],
+      "liveUrl": "https://molecular-demo.sagittarius.ai",
+      "featured": false,
+      "metrics": {
+        "compounds": "50,000+",
+        "predictions": "1M+",
+        "accuracy": "92%"
+      }
+    },
+    {
+      "id": "particle-tracker",
+      "title": "Particle Tracker",
+      "category": "physics",
+      "client": "Fermilab",
+      "year": "2023", 
+      "description": "Real-time particle physics data analysis platform with advanced visualization, collaborative research features, and integration with particle accelerator data streams.",
+      "image": "https://images.pexels.com/photos/8674476/pexels-photo-8674476.jpeg?auto=compress&cs=tinysrgb&w=800&h=600",
+      "technologies": ["React", "D3.js", "WebSockets", "Go", "InfluxDB", "Kafka"],
+      "features": [
+        "Real-time data streaming", 
+        "Particle trajectory visualization",
+        "Event detection algorithms",
+        "Collaborative analysis tools", 
+        "Export capabilities"
+      ],
+      "liveUrl": "https://particle-demo.sagittarius.ai",
+      "featured": false,
+      "metrics": {
+        "events": "10M+",
+        "throughput": "1GB/s",
+        "latency": "<100ms"
+      }
+    }
+  ],
+  "technologies": [
+    "React", "Vue.js", "Next.js", "Angular",
+    "D3.js", "Three.js", "WebGL", "TensorFlow.js",
+    "Node.js", "Python", "Go", "Flask",
+    "MongoDB", "PostgreSQL", "Redis", "InfluxDB",
+    "Docker", "Kubernetes", "AWS", "GraphQL"
+  ],
+  "categories": [
+    { "id": "all", "name": "All Projects", "count": 12 },
+    { "id": "biology", "name": "Biology", "count": 4 },
+    { "id": "chemistry", "name": "Chemistry", "count": 4 },
+    { "id": "physics", "name": "Physics", "count": 4 }
+  ]
+}

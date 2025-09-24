@@ -1,0 +1,140 @@
+{
+  "brandName": "Sagittarius",
+  "tagline": "AI Websites for Science",
+  "version": "1.0.0",
+  "lastUpdated": "2025-01-27",
+  
+  "colorPalette": {
+    "primary": {
+      "background": {
+        "hex": "#050A12",
+        "rgb": "5, 10, 18",
+        "usage": "Main background color",
+        "cssVar": "--bg-color",
+        "tailwindClass": "bg-sage-bg"
+      },
+      "accent": {
+        "hex": "#53D5FF", 
+        "rgb": "83, 213, 255",
+        "usage": "Primary accent, buttons, highlights",
+        "cssVar": "--accent-color",
+        "tailwindClass": "text-sage-accent"
+      },
+      "textPrimary": {
+        "hex": "#E2E5EA",
+        "rgb": "226, 229, 234", 
+        "usage": "Headings and important text",
+        "cssVar": "--text-light",
+        "tailwindClass": "text-sage-text-light"
+      },
+      "textSecondary": {
+        "hex": "#B8BBC4",
+        "rgb": "184, 187, 196",
+        "usage": "Body text and descriptions", 
+        "cssVar": "--text-color",
+        "tailwindClass": "text-sage-text"
+      }
+    },
+    "secondary": {
+      "cardBackground": {
+        "hex": "#0A1220",
+        "rgb": "10, 18, 32",
+        "usage": "Card and container backgrounds",
+        "cssVar": "--card-bg",
+        "tailwindClass": "bg-sage-card"
+      },
+      "borders": {
+        "hex": "#1A2332", 
+        "rgb": "26, 35, 50",
+        "usage": "Borders and dividers",
+        "cssVar": "--border-color",
+        "tailwindClass": "border-sage-border"
+      },
+      "deepShadows": {
+        "hex": "#000010",
+        "rgb": "0, 0, 16",
+        "usage": "Deep shadows and dark gradients",
+        "cssVar": "--deep-bg", 
+        "tailwindClass": "bg-sage-deep"
+      }
+    }
+  },
+
+  "typography": {
+    "fontFamily": {
+      "primary": "Inter",
+      "fallback": "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif",
+      "cssDeclaration": "font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;"
+    },
+    "fontWeights": {
+      "light": 300,
+      "regular": 400, 
+      "medium": 500,
+      "semibold": 600,
+      "bold": 700,
+      "extrabold": 800
+    },
+    "lineHeights": {
+      "headings": "1.2",
+      "body": "1.6",
+      "loose": "1.8"
+    },
+    "fontSizes": {
+      "hero": "4rem",      // 64px
+      "h1": "3rem",        // 48px  
+      "h2": "2.25rem",     // 36px
+      "h3": "1.875rem",    // 30px
+      "h4": "1.5rem",      // 24px
+      "body": "1rem",      // 16px
+      "small": "0.875rem"  // 14px
+    }
+  },
+
+  "spacing": {
+    "scale": "8px base",
+    "system": {
+      "xs": "0.5rem",    // 8px
+      "sm": "0.75rem",   // 12px  
+      "md": "1rem",      // 16px
+      "lg": "1.5rem",    // 24px
+      "xl": "2rem",      // 32px
+      "2xl": "3rem",     // 48px
+      "3xl": "4rem",     // 64px
+      "4xl": "6rem"      // 96px
+    },
+    "sections": {
+      "padding": "4rem 0", // 64px top/bottom
+      "marginBottom": "3rem" // 48px
+    }
+  },
+
+  "components": {
+    "buttons": {
+      "primary": "bg-sage-accent text-sage-bg font-semibold py-3 px-6 rounded-lg",
+      "secondary": "border border-sage-accent text-sage-accent font-semibold py-3 px-6 rounded-lg"
+    },
+    "cards": {
+      "default": "bg-sage-card border border-sage-border rounded-xl p-6"
+    }
+  },
+
+  "breakpoints": {
+    "mobile": "640px",
+    "tablet": "768px", 
+    "laptop": "1024px",
+    "desktop": "1280px",
+    "xl": "1536px"
+  },
+
+  "editableContent": {
+    "placeholders": "[REPLACE WITH COMPANY_TEXT]",
+    "adminEditableAreas": [
+      "Footer content",
+      "FAQ sections", 
+      "Company description",
+      "Contact information",
+      "Testimonials",
+      "Service descriptions"
+    ]
+  }
+}
