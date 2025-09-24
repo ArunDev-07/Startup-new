@@ -185,7 +185,7 @@ const Portfolio: React.FC = () => {
           <div className="aspect-video rounded-lg overflow-hidden bg-black shadow-lg">
             {/* Replace src with your hosted mp4/webm. muted & playsInline are required for autoplay on most browsers */}
             <video
-              src="/Videos/video-main.mp4"
+              src="./public/Videos/video-main.mp4"
               autoPlay
               loop
               muted
