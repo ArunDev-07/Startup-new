@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ExternalLink, Github, ArrowRight } from 'lucide-react';
 
 interface PortfolioItem {
@@ -17,6 +17,8 @@ const Portfolio: React.FC = () => {
   const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [loading, setLoading] = useState(true);
+
+  const videoRef = useRef<HTMLVideoElement | null>(null);
 
   const categories = [
     { id: 'all', name: 'All Projects' },
@@ -51,13 +53,30 @@ const Portfolio: React.FC = () => {
     fetchPortfolio();
   }, []);
 
+  // Ensure autoplay on browsers that allow muted autoplay
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    v.muted = true;
+    const tryPlay = async () => {
+      try {
+        await v.play();
+      } catch (e) {
+        // ignore - browser blocked autoplay
+      }
+    };
+    tryPlay();
+  }, []);
+
   const fallbackPortfolioData: PortfolioItem[] = [
     {
       id: '1',
       title: 'GenomeViz Pro',
       category: 'biology',
-      description: "Interactive genome browser for Stanford's genomics research team with real-time data visualization and collaborative annotation tools.",
-      image: 'https://images.pexels.com/photos/3825417/pexels-photo-3825417.jpeg?auto=compress&cs=tinysrgb&w=800&h=600',
+      description:
+        "Interactive genome browser for Stanford's genomics research team with real-time data visualization and collaborative annotation tools.",
+      image:
+        'https://images.pexels.com/photos/3825417/pexels-photo-3825417.jpeg?auto=compress&cs=tinysrgb&w=800&h=600',
       technologies: ['React', 'D3.js', 'WebGL', 'Node.js', 'MongoDB'],
       liveUrl: 'https://genomeviz-demo.sagittarius.ai',
       githubUrl: 'https://github.com/sagittarius/genomeviz',
@@ -67,8 +86,10 @@ const Portfolio: React.FC = () => {
       id: '2',
       title: 'ChemLab Analytics',
       category: 'chemistry',
-      description: "Comprehensive chemical analysis platform for MIT's chemistry department with molecular modeling and reaction pathway visualization.",
-      image: 'https://images.pexels.com/photos/2280547/pexels-photo-2280547.jpeg?auto=compress&cs=tinysrgb&w=800&h=600',
+      description:
+        "Comprehensive chemical analysis platform for MIT's chemistry department with molecular modeling and reaction pathway visualization.",
+      image:
+        'https://images.pexels.com/photos/2280547/pexels-photo-2280547.jpeg?auto=compress&cs=tinysrgb&w=800&h=600',
       technologies: ['Vue.js', 'Three.js', 'RDKit', 'Python', 'PostgreSQL'],
       liveUrl: 'https://chemlab-demo.sagittarius.ai',
       featured: true
@@ -77,8 +98,10 @@ const Portfolio: React.FC = () => {
       id: '3',
       title: 'Quantum Simulator Hub',
       category: 'physics',
-      description: 'Advanced quantum physics simulation platform for CERN with real-time particle interaction modeling and collaborative research tools.',
-      image: 'https://images.pexels.com/photos/8674530/pexels-photo-8674530.jpeg?auto=compress&cs=tinysrgb&w=800&h=600',
+      description:
+        'Advanced quantum physics simulation platform for CERN with real-time particle interaction modeling and collaborative research tools.',
+      image:
+        'https://images.pexels.com/photos/8674530/pexels-photo-8674530.jpeg?auto=compress&cs=tinysrgb&w=800&h=600',
       technologies: ['Next.js', 'WebAssembly', 'TensorFlow.js', 'WebGL', 'Redis'],
       liveUrl: 'https://quantum-demo.sagittarius.ai',
       githubUrl: 'https://github.com/sagittarius/quantum-sim',
@@ -88,8 +111,10 @@ const Portfolio: React.FC = () => {
       id: '4',
       title: 'BioData Portal',
       category: 'biology',
-      description: 'Centralized research data management system for Harvard Medical School with automated data processing and visualization.',
-      image: 'https://images.pexels.com/photos/3938023/pexels-photo-3938023.jpeg?auto=compress&cs=tinysrgb&w=800&h=600',
+      description:
+        'Centralized research data management system for Harvard Medical School with automated data processing and visualization.',
+      image:
+        'https://images.pexels.com/photos/3938023/pexels-photo-3938023.jpeg?auto=compress&cs=tinysrgb&w=800&h=600',
       technologies: ['React', 'GraphQL', 'Python', 'ElasticSearch', 'Docker'],
       liveUrl: 'https://biodata-demo.sagittarius.ai',
       featured: false
@@ -98,8 +123,10 @@ const Portfolio: React.FC = () => {
       id: '5',
       title: 'Molecular Designer',
       category: 'chemistry',
-      description: 'AI-powered molecular design tool for pharmaceutical research with predictive modeling and drug discovery capabilities.',
-      image: 'https://images.pexels.com/photos/3825328/pexels-photo-3825328.jpeg?auto=compress&cs=tinysrgb&w=800&h=600',
+      description:
+        'AI-powered molecular design tool for pharmaceutical research with predictive modeling and drug discovery capabilities.',
+      image:
+        'https://images.pexels.com/photos/3825328/pexels-photo-3825328.jpeg?auto=compress&cs=tinysrgb&w=800&h=600',
       technologies: ['Angular', 'TensorFlow.js', 'WebGL', 'Flask', 'MongoDB'],
       liveUrl: 'https://molecular-demo.sagittarius.ai',
       featured: false
@@ -108,21 +135,24 @@ const Portfolio: React.FC = () => {
       id: '6',
       title: 'Particle Tracker',
       category: 'physics',
-      description: 'Real-time particle physics data analysis platform with advanced visualization and collaborative research features.',
-      image: 'https://images.pexels.com/photos/8674476/pexels-photo-8674476.jpeg?auto=compress&cs=tinysrgb&w=800&h=600',
+      description:
+        'Real-time particle physics data analysis platform with advanced visualization and collaborative research features.',
+      image:
+        'https://images.pexels.com/photos/8674476/pexels-photo-8674476.jpeg?auto=compress&cs=tinysrgb&w=800&h=600',
       technologies: ['React', 'D3.js', 'WebSockets', 'Go', 'InfluxDB'],
       liveUrl: 'https://particle-demo.sagittarius.ai',
       featured: false
     }
   ];
 
-  const filteredItems = selectedCategory === 'all' 
-    ? portfolioItems 
-    : portfolioItems.filter(item => item.category === selectedCategory);
+  const filteredItems =
+    selectedCategory === 'all'
+      ? portfolioItems
+      : portfolioItems.filter((item) => item.category === selectedCategory);
 
   // Limit items shown
   const displayedFiltered = filteredItems.slice(0, maxProjects);
-  const featuredItems = portfolioItems.filter(item => item.featured);
+  const featuredItems = portfolioItems.filter((item) => item.featured);
   const displayedFeatured = featuredItems.slice(0, maxProjects);
 
   if (loading) {
@@ -138,7 +168,15 @@ const Portfolio: React.FC = () => {
 
   return (
     <div className="pt-16 lg:pt-20">
-      {/* Hero Section */}
+      {/* ====== TOP: Hero Banner ====== */}
+     
+      {/* ====== TOP: Visual Showcase (centered image) ====== */}
+   
+
+      {/* ====== AUTOPLAY VIDEO SECTION (muted, loop, autoplay, playsInline) ====== */}
+      
+
+      {/* ====== Hero Section (original) ====== */}
       <section className="section-padding bg-gradient-to-b from-sage-bg to-sage-deep">
         <div className="container-custom text-center">
           <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-sage-accent/10 text-sage-accent border border-sage-accent/20 mb-6">
@@ -150,21 +188,57 @@ const Portfolio: React.FC = () => {
             <span className="gradient-text">Intelligent Web Solutions</span>
           </h1>
           <p className="text-xl text-sage-text max-w-3xl mx-auto mb-8">
-            Explore our collection of AI-powered websites and platforms that are revolutionizing 
-            how researchers in biology, chemistry, and physics share their discoveries.
+            Explore our collection of AI-powered websites and platforms that are revolutionizing how researchers in biology, chemistry, and physics share their discoveries.
           </p>
+
+
+          
+      <section className="section-padding">
+        <div className="container-custom flex flex-col items-center">
+          <div className="w-full max-w-5xl">
+            <div className="aspect-video rounded-lg overflow-hidden shadow-lg bg-black">
+              <video
+                ref={videoRef}
+                poster="/mnt/data/da49c375-c0d2-404c-b688-50d0601a07b4.png"
+                preload="auto"
+                autoPlay
+                muted
+                loop
+                playsInline
+                className="w-full h-full object-cover"
+              >
+                {/* Provide both webm and mp4 sources if available */}
+                <source src="/Videos/profile.webm" type="video/webm" />
+                <source src="/Videos/profile.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            </div>
+          </div>
+
+          <div className="mt-6 text-center max-w-2xl">
+            <p className="text-sage-text leading-relaxed mb-4">
+              Since 2016, we have been helping research teams and product-first companies design production-ready platforms and data-driven tools.
+            </p>
+            <button className="px-6 py-2 border border-sage-accent text-sage-accent rounded-full hover:bg-sage-accent/10 transition">
+              What we do
+            </button>
+          </div>
         </div>
       </section>
 
-      {/* Tech Stacks + Video Section (moved to top) */}
+        </div>
+        
+      </section>
+
+
+      {/* Tech Stacks + Video Section */}
       <section className="section-padding">
         <div className="container-custom grid lg:grid-cols-2 gap-8 items-center">
           {/* Left: Tech stacks text */}
           <div className="space-y-6">
             <h2 className="text-3xl lg:text-4xl font-bold text-sage-text-light">Tech Stacks We Use</h2>
             <p className="text-sage-text text-lg leading-relaxed max-w-2xl">
-              We build modern, scalable platforms using a combination of frontend, backend and machine learning
-              technologies. Our core stacks include:
+              We build modern, scalable platforms using a combination of frontend, backend and machine learning technologies. Our core stacks include:
             </p>
 
             <ul className="grid grid-cols-2 gap-3 max-w-md">
@@ -181,41 +255,35 @@ const Portfolio: React.FC = () => {
             </p>
           </div>
 
-          {/* Right: Autoplaying video */}
+          {/* Right: Video placeholder (kept as-is) */}
           <div className="aspect-video rounded-lg overflow-hidden bg-black shadow-lg">
-            {/* Replace src with your hosted mp4/webm. muted & playsInline are required for autoplay on most browsers */}
-           <video
-  src="/Videos/video-main.mp4"
-  autoPlay
-  loop
-  muted
-  playsInline
-  preload="auto"
-  className="w-full h-full object-cover"
->
-  Your browser does not support the video tag.
-</video>
-
+            <video
+              src="/Videos/video-main.mp4"
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload="auto"
+              className="w-full h-full object-cover"
+            >
+              Your browser does not support the video tag.
+            </video>
           </div>
         </div>
       </section>
 
-      {/* About + Team Section (moved to top) */}
+      {/* About + Team Section */}
       <section className="section-padding bg-sage-deep">
         <div className="container-custom grid grid-cols-1 lg:grid-cols-3 gap-12 items-start py-24">
           {/* Left: About Us text (larger, spans 2 columns on large screens) */}
           <div className="lg:col-span-2 space-y-8">
             <h2 className="text-4xl lg:text-6xl font-extrabold leading-tight text-sage-text-light">About Us</h2>
             <p className="text-lg lg:text-xl text-sage-text leading-relaxed max-w-4xl">
-              We are a small, focused team of engineers and researchers who love building tools that make
-              scientific workflows faster and more reproducible. We combine product-minded engineering with
-              deep technical expertise in ML, backend systems, and interactive visualizations.
+              We are a small, focused team of engineers and researchers who love building tools that make scientific workflows faster and more reproducible. We combine product-minded engineering with deep technical expertise in ML, backend systems, and interactive visualizations.
             </p>
 
             <p className="text-lg text-sage-text max-w-3xl">
-              Our mission is to empower research teams to move from data to insight with as little friction as possible.
-              We ship production-grade platforms using battle-tested technologies and maintain a strong focus on
-              performance, security, and developer experience.
+              Our mission is to empower research teams to move from data to insight with as little friction as possible. We ship production-grade platforms using battle-tested technologies and maintain a strong focus on performance, security, and developer experience.
             </p>
 
             <div className="mt-6">
@@ -231,7 +299,7 @@ const Portfolio: React.FC = () => {
             </div>
           </div>
 
-          {/* Right: Team members (bigger visuals) */}
+          {/* Right: Team members */}
           <div className="space-y-6">
             <h3 className="text-2xl font-bold text-sage-text-light text-center lg:text-left">The Team</h3>
             <div className="grid grid-cols-1 sm:grid-cols-1 gap-6">
@@ -270,61 +338,38 @@ const Portfolio: React.FC = () => {
       {displayedFeatured.length > 0 && (
         <section className="section-padding">
           <div className="container-custom">
-            <h2 className="text-3xl lg:text-4xl font-bold text-center mb-16 text-sage-text-light">
-              Featured Projects
-            </h2>
+            <h2 className="text-3xl lg:text-4xl font-bold text-center mb-16 text-sage-text-light">Featured Projects</h2>
             <div className="grid lg:grid-cols-3 gap-8 mb-16">
               {displayedFeatured.map((item) => (
                 <div key={item.id} className="card group hover:scale-[1.02] transition-all duration-300">
                   <div className="aspect-video bg-sage-deep rounded-lg mb-6 overflow-hidden">
-                    <img
-                      src={item.image}
-                      alt={item.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
+                    <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                   </div>
-                  
+
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <span className="px-3 py-1 bg-sage-accent/10 text-sage-accent rounded-full text-sm font-medium">
-                        {categories.find(cat => cat.id === item.category)?.name}
+                        {categories.find((cat) => cat.id === item.category)?.name}
                       </span>
                       <div className="flex space-x-2">
-                        <a
-                          href={item.liveUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="p-2 bg-sage-deep hover:bg-sage-accent text-sage-text hover:text-sage-bg rounded-lg transition-all duration-200"
-                        >
+                        <a href={item.liveUrl} target="_blank" rel="noopener noreferrer" className="p-2 bg-sage-deep hover:bg-sage-accent text-sage-text hover:text-sage-bg rounded-lg transition-all duration-200">
                           <ExternalLink className="w-4 h-4" />
                         </a>
                         {item.githubUrl && (
-                          <a
-                            href={item.githubUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="p-2 bg-sage-deep hover:bg-sage-accent text-sage-text hover:text-sage-bg rounded-lg transition-all duration-200"
-                          >
+                          <a href={item.githubUrl} target="_blank" rel="noopener noreferrer" className="p-2 bg-sage-deep hover:bg-sage-accent text-sage-text hover:text-sage-bg rounded-lg transition-all duration-200">
                             <Github className="w-4 h-4" />
                           </a>
                         )}
                       </div>
                     </div>
-                    
-                    <h3 className="text-xl font-bold text-sage-text-light">
-                      {item.title}
-                    </h3>
-                    
-                    <p className="text-sage-text leading-relaxed">
-                      {item.description}
-                    </p>
-                    
+
+                    <h3 className="text-xl font-bold text-sage-text-light">{item.title}</h3>
+
+                    <p className="text-sage-text leading-relaxed">{item.description}</p>
+
                     <div className="flex flex-wrap gap-2">
                       {item.technologies.map((tech) => (
-                        <span
-                          key={tech}
-                          className="px-2 py-1 bg-sage-deep text-sage-text rounded text-xs"
-                        >
+                        <span key={tech} className="px-2 py-1 bg-sage-deep text-sage-text rounded text-xs">
                           {tech}
                         </span>
                       ))}
@@ -341,10 +386,8 @@ const Portfolio: React.FC = () => {
       <section className="section-padding bg-sage-deep">
         <div className="container-custom">
           <div className="text-center mb-12">
-            <h2 className="text-3xl lg:text-4xl font-bold mb-6 text-sage-text-light">
-              All Projects
-            </h2>
-            
+            <h2 className="text-3xl lg:text-4xl font-bold mb-6 text-sage-text-light">All Projects</h2>
+
             {/* Category Filter */}
             <div className="flex flex-wrap justify-center gap-2 mb-8">
               {categories.map((category) => (
@@ -368,54 +411,33 @@ const Portfolio: React.FC = () => {
             {displayedFiltered.map((item) => (
               <div key={item.id} className="card group hover:scale-[1.02] transition-all duration-300">
                 <div className="aspect-video bg-sage-bg rounded-lg mb-6 overflow-hidden">
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
+                  <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                 </div>
-                
+
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="px-3 py-1 bg-sage-accent/10 text-sage-accent rounded-full text-sm font-medium">
-                      {categories.find(cat => cat.id === item.category)?.name}
+                      {categories.find((cat) => cat.id === item.category)?.name}
                     </span>
                     <div className="flex space-x-2">
-                      <a
-                        href={item.liveUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-2 bg-sage-bg hover:bg-sage-accent text-sage-text hover:text-sage-bg rounded-lg transition-all duration-200"
-                      >
+                      <a href={item.liveUrl} target="_blank" rel="noopener noreferrer" className="p-2 bg-sage-bg hover:bg-sage-accent text-sage-text hover:text-sage-bg rounded-lg transition-all duration-200">
                         <ExternalLink className="w-4 h-4" />
                       </a>
                       {item.githubUrl && (
-                        <a
-                          href={item.githubUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="p-2 bg-sage-bg hover:bg-sage-accent text-sage-text hover:text-sage-bg rounded-lg transition-all duration-200"
-                        >
+                        <a href={item.githubUrl} target="_blank" rel="noopener noreferrer" className="p-2 bg-sage-bg hover:bg-sage-accent text-sage-text hover:text-sage-bg rounded-lg transition-all duration-200">
                           <Github className="w-4 h-4" />
                         </a>
                       )}
                     </div>
                   </div>
-                  
-                  <h3 className="text-xl font-bold text-sage-text-light">
-                    {item.title}
-                  </h3>
-                  
-                  <p className="text-sage-text leading-relaxed">
-                    {item.description}
-                  </p>
-                  
+
+                  <h3 className="text-xl font-bold text-sage-text-light">{item.title}</h3>
+
+                  <p className="text-sage-text leading-relaxed">{item.description}</p>
+
                   <div className="flex flex-wrap gap-2">
                     {item.technologies.map((tech) => (
-                      <span
-                        key={tech}
-                        className="px-2 py-1 bg-sage-bg text-sage-text rounded text-xs"
-                      >
+                      <span key={tech} className="px-2 py-1 bg-sage-bg text-sage-text rounded text-xs">
                         {tech}
                       </span>
                     ))}
@@ -427,9 +449,7 @@ const Portfolio: React.FC = () => {
 
           {displayedFiltered.length === 0 && (
             <div className="text-center py-16">
-              <p className="text-sage-text text-lg">
-                No projects found in this category.
-              </p>
+              <p className="text-sage-text text-lg">No projects found in this category.</p>
             </div>
           )}
         </div>
@@ -439,21 +459,16 @@ const Portfolio: React.FC = () => {
       <section className="section-padding">
         <div className="container-custom">
           <div className="card text-center max-w-4xl mx-auto">
-            <h2 className="text-3xl lg:text-4xl font-bold mb-6 text-sage-text-light">
-              Ready to Start Your Project?
-            </h2>
+            <h2 className="text-3xl lg:text-4xl font-bold mb-6 text-sage-text-light">Ready to Start Your Project?</h2>
             <p className="text-xl text-sage-text mb-8 max-w-2xl mx-auto">
-              [REPLACE WITH COMPANY_TEXT] Let's create an AI-powered website 
-              that showcases your research and helps you connect with the scientific community.
+              [REPLACE WITH COMPANY_TEXT] Let's create an AI-powered website that showcases your research and helps you connect with the scientific community.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button className="btn-primary">
                 Start Your Project
                 <ArrowRight className="w-4 h-4 ml-2" />
               </button>
-              <button className="btn-secondary">
-                Schedule Consultation
-              </button>
+              <button className="btn-secondary">Schedule Consultation</button>
             </div>
           </div>
         </div>
