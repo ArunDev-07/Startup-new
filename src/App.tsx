@@ -1,3 +1,4 @@
+// src/App.tsx
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navigation from './components/Navigation';
@@ -8,6 +9,7 @@ import Portfolio from './pages/Portfolio';
 import Blog from './pages/Blog';
 import Contact from './pages/Contact';
 import Admin from './pages/Admin';
+import FloatingVideo from './pages/FloatingVideo';
 import './styles/globals.css';
 
 function App() {
@@ -18,9 +20,8 @@ function App() {
         <main>
           <Routes>
             <Route path="/" element={<Home />} />
-         <Route path="/services" element={<Services />} />
-<Route path="/services/:id" element={<Services />} />
-
+            <Route path="/services" element={<Services />} />
+            <Route path="/services/:id" element={<Services />} />
             <Route path="/portfolio" element={<Portfolio />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:id" element={<Blog />} />
@@ -28,7 +29,11 @@ function App() {
             <Route path="/admin" element={<Admin />} />
           </Routes>
         </main>
+
         <Footer />
+
+        {/* Floating video mounted here — it's fixed-positioned and will appear over the page */}
+        <FloatingVideo />
       </div>
     </Router>
   );

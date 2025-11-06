@@ -1,0 +1,82 @@
+/* -------------------------------------------------------------------------- */
+/* Video.css (place in the same / import as before)                             */
+/* -------------------------------------------------------------------------- */
+
+/* smooth, slow spin */
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* apply rotation to the svg group */
+.rotate {
+  animation: spin-slow 8s linear infinite;
+  transform-origin: 50% 50%;
+  /* allow smooth pausing/transforming */
+  transition: transform 220ms ease, filter 180ms ease;
+}
+
+/* optional ring glow + styling */
+.ring-svg {
+  filter: drop-shadow(0 6px 18px rgba(0,0,0,0.35));
+  transition: transform 220ms ease, filter 180ms ease, opacity 200ms ease;
+}
+
+/* tune text appearance (SVG text uses this CSS selector) */
+.ring-svg .ring-text {
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: filter 160ms ease, opacity 160ms ease, transform 200ms ease;
+}
+
+/* subtle halo specific tweaks */
+.ring-halo {
+  filter: blur(0.6px);
+}
+
+/* interactive hover: slightly scale up ring + video (smooth) */
+.fixed .relative:hover .ring-svg,
+.fixed .relative:focus .ring-svg {
+  transform: scale(1.045);
+  animation-play-state: paused; /* pause rotation for a pleasant effect */
+}
+
+.fixed .relative:hover video,
+.fixed .relative:focus video {
+  transform: scale(1.12);
+  transition: transform 220ms cubic-bezier(.2,.9,.2,1);
+}
+
+/* make sure video is smooth & rounded */
+video.rounded-full {
+  transition: transform 220ms ease;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+/* When hovering/focusing: slightly brighten the ring text */
+.fixed .relative:hover .ring-text,
+.fixed .relative:focus .ring-text {
+  filter: brightness(1.15);
+  opacity: 1;
+}
+
+/* Brighten the colored CONTACT tspans on hover (targets tspans with fill attribute)
+   - kept for compatibility if you later want accents back */
+.fixed .relative:hover .ring-svg tspan[fill],
+.fixed .relative:focus .ring-svg tspan[fill] {
+  filter: brightness(1.25);
+  transition: filter 160ms ease;
+}
+
+/* keep previous rules — don't remove anything above */
+.ring-svg {
+  filter: drop-shadow(0 6px 18px rgba(0,0,0,0.35));
+  transition: transform 220ms ease, filter 180ms ease, opacity 200ms ease;
+  z-index: 0; /* ensure SVG sits above video which has z-10 */
+  pointer-events: none; /* keep clicks going to parent */
+}

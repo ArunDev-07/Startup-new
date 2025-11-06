@@ -167,7 +167,7 @@ const Portfolio: React.FC = () => {
   }
 
   return (
-    <div className="pt-16 lg:pt-20">
+    <div className="pt-10 lg:pt-10">
       {/* ====== TOP: Hero Banner ====== */}
      
       {/* ====== TOP: Visual Showcase (centered image) ====== */}
