@@ -47,7 +47,7 @@ const Navigation: React.FC = () => {
               <span className="text-sage-bg font-bold text-lg">S</span>
             </div>
             <span className="text-xl font-bold text-sage-text-light">
-              Sagittarius
+              Sagittarix
             </span>
           </Link>
 

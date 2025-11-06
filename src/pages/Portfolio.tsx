@@ -1,3 +1,4 @@
+// Portfolio.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import { ExternalLink, Github, ArrowRight } from 'lucide-react';
 
@@ -17,7 +18,6 @@ const Portfolio: React.FC = () => {
   const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [loading, setLoading] = useState(true);
-
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
   const categories = [
@@ -29,6 +29,29 @@ const Portfolio: React.FC = () => {
 
   // Limit number of visible projects
   const maxProjects = 4;
+
+  // Placeholder to show when an image is missing
+  const placeholder = '/Images/placeholder.png'; // put a placeholder at public/Images/placeholder.png
+
+  /**
+   * getImgSrc
+   * - If value is an absolute URL, returns as-is.
+   * - If it starts with '/', returns as-is (served from public/).
+   * - Otherwise assumes it's a filename under /Images/ in public/.
+   */
+  const getImgSrc = (src?: string) => {
+    if (!src) return placeholder;
+    if (/^https?:\/\//i.test(src)) return src;
+    if (src.startsWith('/')) return src;
+    return `/Images/${src}`;
+  };
+
+  // Centralized image onError handler
+  const handleImgError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    const img = e.currentTarget;
+    img.onerror = null; // prevent loops
+    img.src = placeholder;
+  };
 
   // Fetch portfolio data from API endpoint
   useEffect(() => {
@@ -68,6 +91,15 @@ const Portfolio: React.FC = () => {
     tryPlay();
   }, []);
 
+  // Enable smooth scrolling for anchors and programmatic scrollIntoView
+  useEffect(() => {
+    const prev = document.documentElement.style.scrollBehavior;
+    document.documentElement.style.scrollBehavior = 'smooth';
+    return () => {
+      document.documentElement.style.scrollBehavior = prev || '';
+    };
+  }, []);
+
   const fallbackPortfolioData: PortfolioItem[] = [
     {
       id: '1',
@@ -75,8 +107,7 @@ const Portfolio: React.FC = () => {
       category: 'biology',
       description:
         "Interactive genome browser for Stanford's genomics research team with real-time data visualization and collaborative annotation tools.",
-      image:
-        'https://images.pexels.com/photos/3825417/pexels-photo-3825417.jpeg?auto=compress&cs=tinysrgb&w=800&h=600',
+      image: '/Images/project1.png',
       technologies: ['React', 'D3.js', 'WebGL', 'Node.js', 'MongoDB'],
       liveUrl: 'https://genomeviz-demo.sagittarius.ai',
       githubUrl: 'https://github.com/sagittarius/genomeviz',
@@ -88,8 +119,7 @@ const Portfolio: React.FC = () => {
       category: 'chemistry',
       description:
         "Comprehensive chemical analysis platform for MIT's chemistry department with molecular modeling and reaction pathway visualization.",
-      image:
-        'https://images.pexels.com/photos/2280547/pexels-photo-2280547.jpeg?auto=compress&cs=tinysrgb&w=800&h=600',
+      image: '/Images/project1.png',
       technologies: ['Vue.js', 'Three.js', 'RDKit', 'Python', 'PostgreSQL'],
       liveUrl: 'https://chemlab-demo.sagittarius.ai',
       featured: true
@@ -168,15 +198,7 @@ const Portfolio: React.FC = () => {
 
   return (
     <div className="pt-10 lg:pt-10">
-      {/* ====== TOP: Hero Banner ====== */}
-     
-      {/* ====== TOP: Visual Showcase (centered image) ====== */}
-   
-
-      {/* ====== AUTOPLAY VIDEO SECTION (muted, loop, autoplay, playsInline) ====== */}
-      
-
-      {/* ====== Hero Section (original) ====== */}
+      {/* ====== TOP: Hero Banner (kept concise) ====== */}
       <section className="section-padding bg-gradient-to-b from-sage-bg to-sage-deep">
         <div className="container-custom text-center">
           <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-sage-accent/10 text-sage-accent border border-sage-accent/20 mb-6">
@@ -191,45 +213,40 @@ const Portfolio: React.FC = () => {
             Explore our collection of AI-powered websites and platforms that are revolutionizing how researchers in biology, chemistry, and physics share their discoveries.
           </p>
 
+          <section className="section-padding">
+            <div className="container-custom flex flex-col items-center">
+              <div className="w-full max-w-5xl">
+                <div className="aspect-video rounded-lg overflow-hidden shadow-lg bg-black">
+                  <video
+                    ref={videoRef}
+                    poster={getImgSrc('/Images/video-poster.png')}
+                    preload="auto"
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    className="w-full h-full object-cover"
+                  >
+                    {/* Provide both webm and mp4 sources if available */}
+                    <source src="/Videos/profile.webm" type="video/webm" />
+                    <source src="/Videos/profile.mp4" type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </video>
+                </div>
+              </div>
 
-          
-      <section className="section-padding">
-        <div className="container-custom flex flex-col items-center">
-          <div className="w-full max-w-5xl">
-            <div className="aspect-video rounded-lg overflow-hidden shadow-lg bg-black">
-              <video
-                ref={videoRef}
-                poster="/mnt/data/da49c375-c0d2-404c-b688-50d0601a07b4.png"
-                preload="auto"
-                autoPlay
-                muted
-                loop
-                playsInline
-                className="w-full h-full object-cover"
-              >
-                {/* Provide both webm and mp4 sources if available */}
-                <source src="/Videos/profile.webm" type="video/webm" />
-                <source src="/Videos/profile.mp4" type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
+              <div className="mt-6 text-center max-w-2xl">
+                <p className="text-sage-text leading-relaxed mb-4">
+                  Since 2016, we have been helping research teams and product-first companies design production-ready platforms and data-driven tools.
+                </p>
+                <button className="px-6 py-2 border border-sage-accent text-sage-accent rounded-full hover:bg-sage-accent/10 transition">
+                  What we do
+                </button>
+              </div>
             </div>
-          </div>
-
-          <div className="mt-6 text-center max-w-2xl">
-            <p className="text-sage-text leading-relaxed mb-4">
-              Since 2016, we have been helping research teams and product-first companies design production-ready platforms and data-driven tools.
-            </p>
-            <button className="px-6 py-2 border border-sage-accent text-sage-accent rounded-full hover:bg-sage-accent/10 transition">
-              What we do
-            </button>
-          </div>
+          </section>
         </div>
       </section>
-
-        </div>
-        
-      </section>
-
 
       {/* Tech Stacks + Video Section */}
       <section className="section-padding">
@@ -279,11 +296,10 @@ const Portfolio: React.FC = () => {
           <div className="lg:col-span-2 space-y-8">
             <h2 className="text-4xl lg:text-6xl font-extrabold leading-tight text-sage-text-light">About Us</h2>
             <p className="text-lg lg:text-xl text-sage-text leading-relaxed max-w-4xl">
-              We are a small, focused team of engineers and researchers who love building tools that make scientific workflows faster and more reproducible. We combine product-minded engineering with deep technical expertise in ML, backend systems, and interactive visualizations.
+              Sagittarix Technologies is a deep-tech innovation company dedicated to transforming the future of Science, Technology, Engineering, and Mathematics (STEM) using advanced Artificial Intelligence.
             </p>
-
             <p className="text-lg text-sage-text max-w-3xl">
-              Our mission is to empower research teams to move from data to insight with as little friction as possible. We ship production-grade platforms using battle-tested technologies and maintain a strong focus on performance, security, and developer experience.
+              We build multi-domain AI systems from life sciences to quantum physics not limited to a single product or platform, our mission is to create intelligent technologies that revolutionize industries and elevate human knowledge.
             </p>
 
             <div className="mt-6">
@@ -304,29 +320,47 @@ const Portfolio: React.FC = () => {
             <h3 className="text-2xl font-bold text-sage-text-light text-center lg:text-left">The Team</h3>
             <div className="grid grid-cols-1 sm:grid-cols-1 gap-6">
               <div className="flex items-center gap-4 bg-sage-card p-4 rounded-lg">
-                <img src={'/mnt/data/65eb62dc-9800-40a3-9618-19da12014703.png'} alt="Anbu Malligarjun sri" className="w-40 h-40 rounded-full object-cover flex-shrink-0" />
+                <img
+                  src={getImgSrc('/Images/team-anbu.png')}
+                  alt="Anbu Malligarjun sri"
+                  className="w-40 h-40 rounded-full object-cover flex-shrink-0"
+                  onError={handleImgError}
+                />
                 <div>
                   <div className="text-sage-text font-semibold text-lg">Anbu Malligarjun sri</div>
-                  <div className="text-sage-accent">ML Engineer</div>
-                  <p className="text-sage-text mt-2 text-sm">Expert in building end-to-end machine learning systems and data pipelines for research teams.</p>
+                  <div className="text-sage-accent">🔹 Founder & CEO </div>
+                  <p className="text-sage-text mt-2 text-sm"> 
+Leads company vision, partnerships, growth strategy, and product direction across all domains in STEM.
+</p>
                 </div>
               </div>
 
               <div className="flex items-center gap-4 bg-sage-card p-4 rounded-lg">
-                <img src={'/mnt/data/65eb62dc-9800-40a3-9618-19da12014703.png'} alt="Arun G" className="w-40 h-40 rounded-full object-cover flex-shrink-0" />
+                <img
+                  src={getImgSrc('/Images/team-arun.png')}
+                  alt="Arun G"
+                  className="w-40 h-40 rounded-full object-cover flex-shrink-0"
+                  onError={handleImgError}
+                />
                 <div>
                   <div className="text-sage-text font-semibold text-lg">Arun G</div>
-                  <div className="text-sage-accent">Java Full Stack Developer</div>
-                  <p className="text-sage-text mt-2 text-sm">Focused on scalable backend architecture using Spring Boot and enterprise integrations.</p>
+                  <div className="text-sage-accent">🔹 Co-Founder & CTO </div>
+                  <p className="text-sage-text mt-2 text-sm">Expert in full-stack development. Oversees all technology decisions, architecture, and product execution.
+</p>
                 </div>
               </div>
 
               <div className="flex items-center gap-4 bg-sage-card p-4 rounded-lg">
-                <img src={'/mnt/data/65eb62dc-9800-40a3-9618-19da12014703.png'} alt="Brajin SJ" className="w-40 h-40 rounded-full object-cover flex-shrink-0" />
+                <img
+                  src={getImgSrc('/Images/team-brajin.png')}
+                  alt="Brajin SJ"
+                  className="w-40 h-40 rounded-full object-cover flex-shrink-0"
+                  onError={handleImgError}
+                />
                 <div>
                   <div className="text-sage-text font-semibold text-lg">Brajin SJ</div>
-                  <div className="text-sage-accent">Python Full Stack Developer</div>
-                  <p className="text-sage-text mt-2 text-sm">Builds reliable Python backends, APIs (FastAPI/Django) and data processing services.</p>
+                  <div className="text-sage-accent">🔹 Co-Founder & COO</div>
+                  <p className="text-sage-text mt-2 text-sm">Responsible for operational efficiency, architecture integration, and smooth workflow across scientific and technical projects.</p>
                 </div>
               </div>
             </div>
@@ -343,7 +377,12 @@ const Portfolio: React.FC = () => {
               {displayedFeatured.map((item) => (
                 <div key={item.id} className="card group hover:scale-[1.02] transition-all duration-300">
                   <div className="aspect-video bg-sage-deep rounded-lg mb-6 overflow-hidden">
-                    <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    <img
+                      src={getImgSrc(item.image)}
+                      alt={item.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      onError={handleImgError}
+                    />
                   </div>
 
                   <div className="space-y-4">
@@ -411,7 +450,12 @@ const Portfolio: React.FC = () => {
             {displayedFiltered.map((item) => (
               <div key={item.id} className="card group hover:scale-[1.02] transition-all duration-300">
                 <div className="aspect-video bg-sage-bg rounded-lg mb-6 overflow-hidden">
-                  <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                  <img
+                    src='/Images/project1.png'
+                    alt={item.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    onError={handleImgError}
+                  />
                 </div>
 
                 <div className="space-y-4">

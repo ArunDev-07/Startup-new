@@ -1,6 +1,6 @@
 // src/App.tsx
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Routes, Route, BrowserRouter } from 'react-router-dom';
 import Navigation from './components/Navigation';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -11,10 +11,12 @@ import Contact from './pages/Contact';
 import Admin from './pages/Admin';
 import FloatingVideo from './pages/FloatingVideo';
 import './styles/globals.css';
+import ScrollToTop from './components/SrolltoTop';
 
 function App() {
   return (
-    <Router>
+    <BrowserRouter>
+    <ScrollToTop/>
       <div className="min-h-screen bg-sage-bg text-sage-text">
         <Navigation />
         <main>
@@ -35,7 +37,7 @@ function App() {
         {/* Floating video mounted here — it's fixed-positioned and will appear over the page */}
         <FloatingVideo />
       </div>
-    </Router>
+    </BrowserRouter>
   );
 }
 
