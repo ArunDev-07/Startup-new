@@ -1,16 +1,14 @@
 import React, { useEffect, useRef } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import {  useNavigate } from "react-router-dom";
 import "./Video.css";
 
 const FloatingVideo: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const location = useLocation();
+  
   const navigate = useNavigate();
 
   // Hide on contact page
-  if (location.pathname === "/contact" || location.pathname.startsWith("/contact/")) {
-    return null;
-  }
+ 
 
   useEffect(() => {
     const v = videoRef.current;
