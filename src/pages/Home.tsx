@@ -1,14 +1,18 @@
-import React from 'react';
-import Hero from '../components/Hero';
-import Features from '../components/Features';
-import Testimonials from '../components/Testimonials';
+// Updated Home that uses existing components and appends the BenefitsSection at the bottom
+import Hero from "../components/Hero";
+import Features from "../components/Features";
+
+import { BenefitsSection } from "./Benifits";
+import ThreeSectionPage from "../components/ThreeSectionPage";
 
 const Home: React.FC = () => {
   return (
     <div>
       <Hero />
+      <ThreeSectionPage/>
       <Features />
-      <Testimonials />
+      
+      <BenefitsSection />
     </div>
   );
 };

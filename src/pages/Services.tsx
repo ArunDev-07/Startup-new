@@ -136,20 +136,26 @@ const HERO_POSTER = '/mnt/data/f7273739-cd23-407a-aa5c-6b007d733ab8.png';
 
 // languages / tags data (includes service video tags and programming languages)
 const LANGUAGES: Lang[] = [
-  { name: 'Java', short: 'Reaction & spectral previews', img: '/Images/java.png' },
-  { name: 'Python', short: 'Genome & microscopy previews', img: '/Images/python.png' },
-  { name: 'JavaScript', short: 'Simulations & telemetry', img: '/Images/JavaScript.png' },
-  { name: 'React JS', short: 'Server & model code', img: '/Images/react.png' },
-  { name: 'TypeScript', short: 'Frontend interactivity', img: '/Images/TypeScript.png' },
-  { name: 'MySql', short: 'Typed frontend & SSR', img: '/Images/mysql.png' },
-  { name: 'PostgreSQL', short: 'Typed frontend & SSR', img: '/Images/PostgreSQL.png' },
-  { name: 'Docker', short: 'Containerized deployments', img: '/Images/Docker.png' },
-  { name: 'AWS', short: 'Orchestrated services', img: '/Images/aws.png' },
-  { name: 'HTML', short: 'Orchestrated services', img: '/Images/html.png' },
-  { name: 'CSS', short: 'Orchestrated services', img: '/Images/css.png' },
-  { name: 'Figma', short: 'Orchestrated services', img: '/Images/Figma.png' },
-  { name: 'ChatGPT', short: 'Orchestrated services', img: '/Images/gpt.png' }
+  { name: 'Java', short: 'Enterprise backends', img: '/Images/java3.png' },
+  { name: 'Python', short: 'Data & ML', img: '/Images/python.png' },
+  { name: 'JavaScript', short: 'Web scripting', img: '/Images/JavaScript.png' },
+  { name: 'React JS', short: 'UI library', img: '/Images/react.png' },
+  { name: 'SpringBoot', short: 'Java microservices', img: '/Images/spring1.png' },
+  { name: 'TypeScript', short: 'Typed JavaScript', img: '/Images/TypeScript.png' },
+  { name: 'MySql', short: 'Relational DB', img: '/Images/mysql.png' },
+  { name: 'PostgreSQL', short: 'Advanced relational DB', img: '/Images/PostgreSQL.png' },
+  { name: 'Docker', short: 'Containerization', img: '/Images/Docker.png' },
+  { name: 'AWS', short: 'Cloud services', img: '/Images/aws.png' },
+  { name: 'HTML', short: 'Markup language', img: '/Images/html.png' },
+  { name: 'CSS', short: 'Styling language', img: '/Images/css.png' },
+  { name: 'Figma', short: 'Design & prototyping', img: '/Images/Figma.png' },
+  { name: 'ChatGPT', short: 'Conversational AI', img: '/Images/gpt.png' },
+  { name: 'Next JS', short: 'React framework', img: '/Images/next2.png' },
+  { name: 'FastAPI', short: 'Fast Python APIs', img: '/Images/fast1.png' },
+  { name: 'Django', short: 'Full-stack Python', img: '/Images/jango1.png' },
+  { name: 'Tailwind CSS', short: 'Utility-first CSS', img: '/Images/tailwind.png' }
 ];
+
 
 // small helper components
 function ServiceCard({ svc, onOpen }: { svc: Service; onOpen: (s: Service) => void }) {

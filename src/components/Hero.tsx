@@ -76,10 +76,7 @@ const Hero: React.FC = () => {
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Link>
 
-              <a href={VIDEO_SRC} target="_blank" rel="noopener noreferrer" className="btn-secondary inline-flex items-center">
-                <Play className="w-4 h-4 mr-2" />
-                Watch Demo (opens raw file)
-              </a>
+             
             </div>
 
             <div className="pt-8">

@@ -1,0 +1,26 @@
+/* e.g. src/styles/site.css — import it once (e.g. in _app.tsx or index.css) */
+
+/* container: centered max width + responsive horizontal padding */
+.site-container {
+  max-width: 1200px;   /* desktop max width */
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+/* optional extra vertical breathing on small screens */
+.home-root {
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+/* keep child components' alignment/colors intact.
+   only change layout at larger breakpoints if you want:
+*/
+@media (min-width: 1024px) {
+  .site-container {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+}
