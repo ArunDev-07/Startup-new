@@ -1,6 +1,6 @@
-// Portfolio.tsx
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ExternalLink, Github, ArrowRight } from 'lucide-react';
+
 
 interface PortfolioItem {
   id: string;
@@ -14,11 +14,24 @@ interface PortfolioItem {
   featured: boolean;
 }
 
+interface TeamMember {
+  id: string;
+  name: string;
+  role: string;
+  bio: string;
+  image?: string;
+}
+
 const Portfolio: React.FC = () => {
   const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [loading, setLoading] = useState(true);
+  const [maxProjects, setMaxProjects] = useState<number>(4);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  // modal/team
+  const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
 
   const categories = [
     { id: 'all', name: 'All Projects' },
@@ -27,18 +40,8 @@ const Portfolio: React.FC = () => {
     { id: 'physics', name: 'Physics' }
   ];
 
-  // Limit number of visible projects
-  const maxProjects = 4;
+  const placeholder = '/Images/placeholder.png';
 
-  // Placeholder to show when an image is missing
-  const placeholder = '/Images/placeholder.png'; // put a placeholder at public/Images/placeholder.png
-
-  /**
-   * getImgSrc
-   * - If value is an absolute URL, returns as-is.
-   * - If it starts with '/', returns as-is (served from public/).
-   * - Otherwise assumes it's a filename under /Images/ in public/.
-   */
   const getImgSrc = (src?: string) => {
     if (!src) return placeholder;
     if (/^https?:\/\//i.test(src)) return src;
@@ -46,59 +49,11 @@ const Portfolio: React.FC = () => {
     return `/Images/${src}`;
   };
 
-  // Centralized image onError handler
   const handleImgError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     const img = e.currentTarget;
-    img.onerror = null; // prevent loops
+    img.onerror = null;
     img.src = placeholder;
   };
-
-  // Fetch portfolio data from API endpoint
-  useEffect(() => {
-    const fetchPortfolio = async () => {
-      try {
-        const response = await fetch('/api/portfolio.json');
-        if (response.ok) {
-          const data = await response.json();
-          setPortfolioItems(data.projects || []);
-        } else {
-          // Fallback data if API is not available
-          setPortfolioItems(fallbackPortfolioData);
-        }
-      } catch (error) {
-        console.error('Error fetching portfolio:', error);
-        setPortfolioItems(fallbackPortfolioData);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPortfolio();
-  }, []);
-
-  // Ensure autoplay on browsers that allow muted autoplay
-  useEffect(() => {
-    const v = videoRef.current;
-    if (!v) return;
-    v.muted = true;
-    const tryPlay = async () => {
-      try {
-        await v.play();
-      } catch (e) {
-        // ignore - browser blocked autoplay
-      }
-    };
-    tryPlay();
-  }, []);
-
-  // Enable smooth scrolling for anchors and programmatic scrollIntoView
-  useEffect(() => {
-    const prev = document.documentElement.style.scrollBehavior;
-    document.documentElement.style.scrollBehavior = 'smooth';
-    return () => {
-      document.documentElement.style.scrollBehavior = prev || '';
-    };
-  }, []);
 
   const fallbackPortfolioData: PortfolioItem[] = [
     {
@@ -136,53 +91,120 @@ const Portfolio: React.FC = () => {
       liveUrl: 'https://quantum-demo.sagittarius.ai',
       githubUrl: 'https://github.com/sagittarius/quantum-sim',
       featured: true
-    },
-    {
-      id: '4',
-      title: 'BioData Portal',
-      category: 'biology',
-      description:
-        'Centralized research data management system for Harvard Medical School with automated data processing and visualization.',
-      image:
-        'https://images.pexels.com/photos/3938023/pexels-photo-3938023.jpeg?auto=compress&cs=tinysrgb&w=800&h=600',
-      technologies: ['React', 'GraphQL', 'Python', 'ElasticSearch', 'Docker'],
-      liveUrl: 'https://biodata-demo.sagittarius.ai',
-      featured: false
-    },
-    {
-      id: '5',
-      title: 'Molecular Designer',
-      category: 'chemistry',
-      description:
-        'AI-powered molecular design tool for pharmaceutical research with predictive modeling and drug discovery capabilities.',
-      image:
-        'https://images.pexels.com/photos/3825328/pexels-photo-3825328.jpeg?auto=compress&cs=tinysrgb&w=800&h=600',
-      technologies: ['Angular', 'TensorFlow.js', 'WebGL', 'Flask', 'MongoDB'],
-      liveUrl: 'https://molecular-demo.sagittarius.ai',
-      featured: false
-    },
-    {
-      id: '6',
-      title: 'Particle Tracker',
-      category: 'physics',
-      description:
-        'Real-time particle physics data analysis platform with advanced visualization and collaborative research features.',
-      image:
-        'https://images.pexels.com/photos/8674476/pexels-photo-8674476.jpeg?auto=compress&cs=tinysrgb&w=800&h=600',
-      technologies: ['React', 'D3.js', 'WebSockets', 'Go', 'InfluxDB'],
-      liveUrl: 'https://particle-demo.sagittarius.ai',
-      featured: false
     }
   ];
 
-  const filteredItems =
-    selectedCategory === 'all'
-      ? portfolioItems
-      : portfolioItems.filter((item) => item.category === selectedCategory);
+  // FETCH (accept array or { projects: [] })
+  useEffect(() => {
+    const fetchPortfolio = async () => {
+      try {
+        const response = await fetch('/api/portfolio.json');
+        if (response.ok) {
+          const data = await response.json();
+          const items: PortfolioItem[] = Array.isArray(data) ? data : data.projects || [];
+          setPortfolioItems(items);
+        } else {
+          setPortfolioItems(fallbackPortfolioData);
+        }
+      } catch (err) {
+        console.error('Portfolio fetch error:', err);
+        setPortfolioItems(fallbackPortfolioData);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPortfolio();
+  }, []);
 
-  // Limit items shown
-  const displayedFiltered = filteredItems.slice(0, maxProjects);
-  const featuredItems = portfolioItems.filter((item) => item.featured);
+  // autoplay video when allowed
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    v.muted = true;
+    const tryPlay = async () => {
+      try {
+        await v.play();
+      } catch {
+        /* ignore autoplay block */
+      }
+    };
+    tryPlay();
+  }, []);
+
+  // smooth scroll globally
+  useEffect(() => {
+    const prev = document.documentElement.style.scrollBehavior;
+    document.documentElement.style.scrollBehavior = 'smooth';
+    return () => {
+      document.documentElement.style.scrollBehavior = prev || '';
+    };
+  }, []);
+
+  // responsive featured count
+  useEffect(() => {
+    const calc = () => {
+      const w = window.innerWidth;
+      if (w < 640) setMaxProjects(1);
+      else if (w >= 640 && w < 1024) setMaxProjects(3);
+      else setMaxProjects(4);
+    };
+    calc();
+    window.addEventListener('resize', calc);
+    return () => window.removeEventListener('resize', calc);
+  }, []);
+
+  // modal: close on Escape
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setSelectedMember(null);
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, []);
+
+  // lock body scroll when modal open
+  useEffect(() => {
+    if (selectedMember) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      setTimeout(() => closeButtonRef.current?.focus(), 50);
+      return () => {
+        document.body.style.overflow = prev || '';
+      };
+    }
+  }, [selectedMember]);
+
+  const teamMembers: TeamMember[] = [
+    {
+      id: 'anbu',
+      name: 'Anbu Malligarjun sri',
+      role: 'Founder & CEO',
+      bio: 'Leads company vision, partnerships, growth strategy, and product direction across all domains in STEM.',
+      image: getImgSrc('/Images/anbu.png')
+    },
+    {
+      id: 'arun',
+      name: 'Arun G',
+      role: 'Co-Founder & CTO',
+      bio: 'Expert in full-stack development. Oversees all technology decisions, architecture, and product execution.',
+      image: getImgSrc('/Images/arun.png')
+    },
+    {
+      id: 'brajin',
+      name: 'Brajin SJ',
+      role: 'Co-Founder & COO',
+      bio: 'Responsible for operational efficiency, architecture integration, and smooth workflow across scientific and technical projects.',
+      image: getImgSrc('/Images/brajin.png')
+    }
+  ];
+
+  const filteredItems = selectedCategory === 'all'
+    ? portfolioItems
+    : portfolioItems.filter((it) => it.category === selectedCategory);
+
+  // All projects: show all filtered; Featured limited by viewport count
+  const displayedFiltered = filteredItems;
+  const featuredItems = portfolioItems.filter((it) => it.featured);
   const displayedFeatured = featuredItems.slice(0, maxProjects);
 
   if (loading) {
@@ -198,18 +220,20 @@ const Portfolio: React.FC = () => {
 
   return (
     <div className="pt-10 lg:pt-10">
-      {/* ====== TOP: Hero Banner (kept concise) ====== */}
+      {/* Hero */}
       <section className="section-padding bg-gradient-to-b from-sage-bg to-sage-deep">
         <div className="container-custom text-center">
           <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-sage-accent/10 text-sage-accent border border-sage-accent/20 mb-6">
             OUR PORTFOLIO
           </div>
-          <h1 className="text-4xl lg:text-6xl font-bold mb-6">
+
+          <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold mb-6 font-nb-arch">
             Transforming Science Through
             <br />
             <span className="gradient-text">Intelligent Web Solutions</span>
           </h1>
-          <p className="text-xl text-sage-text max-w-3xl mx-auto mb-8">
+
+          <p className="text-lg sm:text-xl text-sage-text max-w-3xl mx-auto mb-8">
             Explore our collection of AI-powered websites and platforms that are revolutionizing how researchers in biology, chemistry, and physics share their discoveries.
           </p>
 
@@ -225,9 +249,8 @@ const Portfolio: React.FC = () => {
                     muted
                     loop
                     playsInline
-                    className="w-full h-full object-cover"
+                    className="primary-video w-full h-full object-cover"
                   >
-                    {/* Provide both webm and mp4 sources if available */}
                     <source src="/Videos/profile.webm" type="video/webm" />
                     <source src="/Videos/profile.mp4" type="video/mp4" />
                     Your browser does not support the video tag.
@@ -248,17 +271,16 @@ const Portfolio: React.FC = () => {
         </div>
       </section>
 
-      {/* Tech Stacks + Video Section */}
+      {/* Tech + video */}
       <section className="section-padding">
-        <div className="container-custom grid lg:grid-cols-2 gap-8 items-center">
-          {/* Left: Tech stacks text */}
+        <div className="container-custom grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
           <div className="space-y-6">
-            <h2 className="text-3xl lg:text-4xl font-bold text-sage-text-light">Tech Stacks We Use</h2>
-            <p className="text-sage-text text-lg leading-relaxed max-w-2xl">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-sage-text-light font-nb-arch">Tech Stacks We Use</h2>
+            <p className="text-sage-text text-base sm:text-lg leading-relaxed max-w-2xl">
               We build modern, scalable platforms using a combination of frontend, backend and machine learning technologies. Our core stacks include:
             </p>
 
-            <ul className="grid grid-cols-2 gap-3 max-w-md">
+            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-md">
               <li className="px-4 py-2 bg-sage-card rounded-lg">React</li>
               <li className="px-4 py-2 bg-sage-card rounded-lg">FastAPI</li>
               <li className="px-4 py-2 bg-sage-card rounded-lg">Django</li>
@@ -266,14 +288,10 @@ const Portfolio: React.FC = () => {
               <li className="px-4 py-2 bg-sage-card rounded-lg">Spring Boot</li>
               <li className="px-4 py-2 bg-sage-card rounded-lg">Docker / Kubernetes</li>
             </ul>
-
-            <p className="text-sage-text">
-              This is the stack we rely on to deliver production-ready research platforms — fast, secure, and maintainable.
-            </p>
           </div>
 
-          {/* Right: Video placeholder (kept as-is) */}
-          <div className="aspect-video rounded-lg overflow-hidden bg-black shadow-lg">
+          {/* IMPORTANT: hide this secondary video on small screens so it doesn't stack below the hero video */}
+          <div className="aspect-video rounded-lg overflow-hidden bg-black shadow-lg hidden sm:block">
             <video
               src="/Videos/video-main.mp4"
               autoPlay
@@ -282,24 +300,21 @@ const Portfolio: React.FC = () => {
               playsInline
               preload="auto"
               className="w-full h-full object-cover"
-            >
-              Your browser does not support the video tag.
-            </video>
+            />
           </div>
         </div>
       </section>
 
-      {/* About + Team Section */}
+      {/* About + Team */}
       <section className="section-padding bg-sage-deep">
         <div className="container-custom grid grid-cols-1 lg:grid-cols-3 gap-12 items-start py-24">
-          {/* Left: About Us text (larger, spans 2 columns on large screens) */}
           <div className="lg:col-span-2 space-y-8">
-            <h2 className="text-4xl lg:text-6xl font-extrabold leading-tight text-sage-text-light">About Us</h2>
+            <h2 className="text-3xl sm:text-4xl lg:text-6xl font-extrabold leading-tight text-sage-text-light font-nb-arch">About Us</h2>
             <p className="text-lg lg:text-xl text-sage-text leading-relaxed max-w-4xl">
               Sagittarix Technologies is a deep-tech innovation company dedicated to transforming the future of Science, Technology, Engineering, and Mathematics (STEM) using advanced Artificial Intelligence.
             </p>
             <p className="text-lg text-sage-text max-w-3xl">
-              We build multi-domain AI systems from life sciences to quantum physics not limited to a single product or platform, our mission is to create intelligent technologies that revolutionize industries and elevate human knowledge.
+              We build multi-domain AI systems from life sciences to quantum physics not limited to a single product or platform, our mission is to create intelligent technologies that revolutionize industries and elevate human knowledge.
             </p>
 
             <div className="mt-6">
@@ -315,65 +330,85 @@ const Portfolio: React.FC = () => {
             </div>
           </div>
 
-          {/* Right: Team members */}
           <div className="space-y-6">
             <h3 className="text-2xl font-bold text-sage-text-light text-center lg:text-left">The Team</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-1 gap-6">
-              <div className="flex items-center gap-4 bg-sage-card p-4 rounded-lg">
-                <img
-                  src={getImgSrc('/Images/team-anbu.png')}
-                  alt="Anbu Malligarjun sri"
-                  className="w-40 h-40 rounded-full object-cover flex-shrink-0"
-                  onError={handleImgError}
-                />
-                <div>
-                  <div className="text-sage-text font-semibold text-lg">Anbu Malligarjun sri</div>
-                  <div className="text-sage-accent">🔹 Founder & CEO </div>
-                  <p className="text-sage-text mt-2 text-sm"> 
-Leads company vision, partnerships, growth strategy, and product direction across all domains in STEM.
-</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4 bg-sage-card p-4 rounded-lg">
-                <img
-                  src={getImgSrc('/Images/team-arun.png')}
-                  alt="Arun G"
-                  className="w-40 h-40 rounded-full object-cover flex-shrink-0"
-                  onError={handleImgError}
-                />
-                <div>
-                  <div className="text-sage-text font-semibold text-lg">Arun G</div>
-                  <div className="text-sage-accent">🔹 Co-Founder & CTO </div>
-                  <p className="text-sage-text mt-2 text-sm">Expert in full-stack development. Oversees all technology decisions, architecture, and product execution.
-</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4 bg-sage-card p-4 rounded-lg">
-                <img
-                  src={getImgSrc('/Images/team-brajin.png')}
-                  alt="Brajin SJ"
-                  className="w-40 h-40 rounded-full object-cover flex-shrink-0"
-                  onError={handleImgError}
-                />
-                <div>
-                  <div className="text-sage-text font-semibold text-lg">Brajin SJ</div>
-                  <div className="text-sage-accent">🔹 Co-Founder & COO</div>
-                  <p className="text-sage-text mt-2 text-sm">Responsible for operational efficiency, architecture integration, and smooth workflow across scientific and technical projects.</p>
-                </div>
-              </div>
+            <div className="grid grid-cols-1 gap-6">
+              {teamMembers.map((m) => (
+                <button
+                  key={m.id}
+                  onClick={() => setSelectedMember(m)}
+                  className="flex flex-col sm:flex-row items-center gap-4 bg-sage-card p-4 rounded-lg text-left hover:shadow-md transition"
+                  aria-label={`Open profile for ${m.name}`}
+                >
+                  <img
+                    src={m.image}
+                    alt={m.name}
+                    className="w-32 h-32 sm:w-40 sm:h-40 rounded-full object-cover flex-shrink-0"
+                    onError={handleImgError}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  <div className="mt-3 sm:mt-0">
+                    <div className="text-sage-text font-semibold text-lg">{m.name}</div>
+                    <div className="text-sage-accent">🔹 {m.role}</div>
+                    <p className="text-sage-text mt-2 text-sm line-clamp-3">{m.bio}</p>
+                  </div>
+                </button>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
+      {/* Modal (dark themed by default) */}
+      {selectedMember && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={`${selectedMember.name} profile`}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        >
+          <div
+            className="absolute inset-0 bg-black/60"
+            onClick={() => setSelectedMember(null)}
+            aria-hidden="true"
+          />
+
+          <div className="relative bg-sage-deep text-sage-text rounded-lg max-w-3xl w-full p-6 z-10 shadow-2xl ring-1 ring-sage-accent/10">
+            <button
+              ref={closeButtonRef}
+              onClick={() => setSelectedMember(null)}
+              aria-label="Close profile"
+              className="absolute top-3 right-3 inline-flex items-center justify-center w-8 h-8 rounded-md bg-sage-card hover:bg-sage-accent/10 focus:outline-none focus:ring-2 focus:ring-sage-accent"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-sage-text" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            <div className="flex flex-col sm:flex-row gap-6 items-start">
+              <img
+                src={selectedMember.image}
+                alt={selectedMember.name}
+                className="w-32 h-32 rounded-lg object-cover flex-shrink-0 border border-sage-accent/5"
+                onError={handleImgError}
+              />
+              <div>
+                <h3 className="text-2xl font-bold font-nb-arch">{selectedMember.name}</h3>
+                <div className="text-sage-accent mt-1">{selectedMember.role}</div>
+                <p className="mt-4 text-sage-text leading-relaxed">{selectedMember.bio}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Featured Projects */}
       {displayedFeatured.length > 0 && (
         <section className="section-padding">
           <div className="container-custom">
-            <h2 className="text-3xl lg:text-4xl font-bold text-center mb-16 text-sage-text-light">Featured Projects</h2>
-            <div className="grid lg:grid-cols-3 gap-8 mb-16">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-center mb-12 text-sage-text-light font-nb-arch">Featured Projects</h2>
+            <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
               {displayedFeatured.map((item) => (
                 <div key={item.id} className="card group hover:scale-[1.02] transition-all duration-300">
                   <div className="aspect-video bg-sage-deep rounded-lg mb-6 overflow-hidden">
@@ -382,6 +417,8 @@ Leads company vision, partnerships, growth strategy, and product direction acros
                       alt={item.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       onError={handleImgError}
+                      loading="lazy"
+                      decoding="async"
                     />
                   </div>
 
@@ -391,20 +428,20 @@ Leads company vision, partnerships, growth strategy, and product direction acros
                         {categories.find((cat) => cat.id === item.category)?.name}
                       </span>
                       <div className="flex space-x-2">
-                        <a href={item.liveUrl} target="_blank" rel="noopener noreferrer" className="p-2 bg-sage-deep hover:bg-sage-accent text-sage-text hover:text-sage-bg rounded-lg transition-all duration-200">
+                        <a href={item.liveUrl} target="_blank" rel="noopener noreferrer" className="p-2 bg-sage-deep hover:bg-sage-accent text-sage-text hover:text-sage-bg rounded-lg transition-all duration-200" aria-label={`Open ${item.title} live site`}>
                           <ExternalLink className="w-4 h-4" />
                         </a>
                         {item.githubUrl && (
-                          <a href={item.githubUrl} target="_blank" rel="noopener noreferrer" className="p-2 bg-sage-deep hover:bg-sage-accent text-sage-text hover:text-sage-bg rounded-lg transition-all duration-200">
+                          <a href={item.githubUrl} target="_blank" rel="noopener noreferrer" className="p-2 bg-sage-deep hover:bg-sage-accent text-sage-text hover:text-sage-bg rounded-lg transition-all duration-200" aria-label={`Open ${item.title} GitHub`}>
                             <Github className="w-4 h-4" />
                           </a>
                         )}
                       </div>
                     </div>
 
-                    <h3 className="text-xl font-bold text-sage-text-light">{item.title}</h3>
+                    <h3 className="text-lg sm:text-xl font-bold text-sage-text-light">{item.title}</h3>
 
-                    <p className="text-sage-text leading-relaxed">{item.description}</p>
+                    <p className="text-sage-text leading-relaxed text-sm sm:text-base">{item.description}</p>
 
                     <div className="flex flex-wrap gap-2">
                       {item.technologies.map((tech) => (
@@ -425,14 +462,14 @@ Leads company vision, partnerships, growth strategy, and product direction acros
       <section className="section-padding bg-sage-deep">
         <div className="container-custom">
           <div className="text-center mb-12">
-            <h2 className="text-3xl lg:text-4xl font-bold mb-6 text-sage-text-light">All Projects</h2>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-6 text-sage-text-light font-nb-arch">All Projects</h2>
 
-            {/* Category Filter */}
             <div className="flex flex-wrap justify-center gap-2 mb-8">
               {categories.map((category) => (
                 <button
                   key={category.id}
                   onClick={() => setSelectedCategory(category.id)}
+                  aria-pressed={selectedCategory === category.id}
                   className={`px-4 py-2 rounded-lg transition-all duration-200 ${
                     selectedCategory === category.id
                       ? 'bg-sage-accent text-sage-bg'
@@ -445,16 +482,17 @@ Leads company vision, partnerships, growth strategy, and product direction acros
             </div>
           </div>
 
-          {/* Projects Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {displayedFiltered.map((item) => (
               <div key={item.id} className="card group hover:scale-[1.02] transition-all duration-300">
                 <div className="aspect-video bg-sage-bg rounded-lg mb-6 overflow-hidden">
                   <img
-                    src='/Images/project1.png'
+                    src={getImgSrc(item.image)}
                     alt={item.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     onError={handleImgError}
+                    loading="lazy"
+                    decoding="async"
                   />
                 </div>
 
@@ -464,20 +502,20 @@ Leads company vision, partnerships, growth strategy, and product direction acros
                       {categories.find((cat) => cat.id === item.category)?.name}
                     </span>
                     <div className="flex space-x-2">
-                      <a href={item.liveUrl} target="_blank" rel="noopener noreferrer" className="p-2 bg-sage-bg hover:bg-sage-accent text-sage-text hover:text-sage-bg rounded-lg transition-all duration-200">
+                      <a href={item.liveUrl} target="_blank" rel="noopener noreferrer" className="p-2 bg-sage-bg hover:bg-sage-accent text-sage-text hover:text-sage-bg rounded-lg transition-all duration-200" aria-label={`Open ${item.title} live site`}>
                         <ExternalLink className="w-4 h-4" />
                       </a>
                       {item.githubUrl && (
-                        <a href={item.githubUrl} target="_blank" rel="noopener noreferrer" className="p-2 bg-sage-bg hover:bg-sage-accent text-sage-text hover:text-sage-bg rounded-lg transition-all duration-200">
+                        <a href={item.githubUrl} target="_blank" rel="noopener noreferrer" className="p-2 bg-sage-bg hover:bg-sage-accent text-sage-text hover:text-sage-bg rounded-lg transition-all duration-200" aria-label={`Open ${item.title} GitHub`}>
                           <Github className="w-4 h-4" />
                         </a>
                       )}
                     </div>
                   </div>
 
-                  <h3 className="text-xl font-bold text-sage-text-light">{item.title}</h3>
+                  <h3 className="text-lg sm:text-xl font-bold text-sage-text-light">{item.title}</h3>
 
-                  <p className="text-sage-text leading-relaxed">{item.description}</p>
+                  <p className="text-sage-text leading-relaxed text-sm sm:text-base">{item.description}</p>
 
                   <div className="flex flex-wrap gap-2">
                     {item.technologies.map((tech) => (
@@ -499,16 +537,16 @@ Leads company vision, partnerships, growth strategy, and product direction acros
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* CTA */}
       <section className="section-padding">
         <div className="container-custom">
           <div className="card text-center max-w-4xl mx-auto">
-            <h2 className="text-3xl lg:text-4xl font-bold mb-6 text-sage-text-light">Ready to Start Your Project?</h2>
-            <p className="text-xl text-sage-text mb-8 max-w-2xl mx-auto">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-6 text-sage-text-light font-nb-arch">Ready to Start Your Project?</h2>
+            <p className="text-lg text-sage-text mb-8 max-w-2xl mx-auto">
               [REPLACE WITH COMPANY_TEXT] Let's create an AI-powered website that showcases your research and helps you connect with the scientific community.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="btn-primary">
+              <button className="btn-primary inline-flex items-center justify-center">
                 Start Your Project
                 <ArrowRight className="w-4 h-4 ml-2" />
               </button>

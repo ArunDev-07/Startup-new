@@ -1,19 +1,17 @@
-// ServicesInteractive.tsx
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import {
   Microscope,
   FlaskConical,
   Atom,
-  Database,
-  Server,
-  Cpu,
   Zap,
-  Check,
   ArrowRight,
   X
 } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import ReactDOM from 'react-dom';
 
+// --- types
 type Service = {
   id: string;
   Icon: React.ComponentType<any>;
@@ -29,8 +27,16 @@ type Service = {
   price: string;
   timeline: string;
   exampleImage?: string;
+  exampleVideo?: string; // new: optional video preview for the service
 };
 
+type Lang = {
+  name: string;
+  short: string;
+  img?: string; // image or video path
+};
+
+// --- data (now includes exampleVideo fields)
 const SERVICES: Service[] = [
   {
     id: 'biology',
@@ -61,7 +67,7 @@ const SERVICES: Service[] = [
     technologies: ['Next.js', 'D3.js', 'WebGL/Three.js', 'Python APIs', 'Postgres / MinIO'],
     price: 'From $18,000',
     timeline: '8-10 weeks',
-    exampleImage: '/images/biology-sample.jpg'
+    exampleVideo: '/Videos/bio.mp4'
   },
   {
     id: 'chemistry',
@@ -91,7 +97,7 @@ const SERVICES: Service[] = [
     technologies: ['React', 'RDKit/Wasmtime', 'Three.js', 'Redis', 'Postgres'],
     price: 'From $20,000',
     timeline: '8-12 weeks',
-    exampleImage: '/images/chemistry-sample.jpg'
+    exampleVideo: '/Videos/che.mp4'
   },
   {
     id: 'physics',
@@ -121,48 +127,168 @@ const SERVICES: Service[] = [
     technologies: ['Vue/React', 'WebAssembly', 'TensorFlow.js', 'Redis', 'TimescaleDB'],
     price: 'From $22,000',
     timeline: '10-14 weeks',
-    exampleImage: '/images/physics-sample.jpg'
+    exampleVideo: '/Videos/phy.mp4'
   }
 ];
 
+// hero poster (fallback)
+const HERO_POSTER = '/mnt/data/f7273739-cd23-407a-aa5c-6b007d733ab8.png';
+
+// languages / tags data (includes service video tags and programming languages)
+const LANGUAGES: Lang[] = [
+  { name: 'Java', short: 'Reaction & spectral previews', img: '/Images/java.png' },
+  { name: 'Python', short: 'Genome & microscopy previews', img: '/Images/python.png' },
+  { name: 'JavaScript', short: 'Simulations & telemetry', img: '/Images/JavaScript.png' },
+  { name: 'React JS', short: 'Server & model code', img: '/Images/react.png' },
+  { name: 'TypeScript', short: 'Frontend interactivity', img: '/Images/TypeScript.png' },
+  { name: 'MySql', short: 'Typed frontend & SSR', img: '/Images/mysql.png' },
+  { name: 'PostgreSQL', short: 'Typed frontend & SSR', img: '/Images/PostgreSQL.png' },
+  { name: 'Docker', short: 'Containerized deployments', img: '/Images/Docker.png' },
+  { name: 'AWS', short: 'Orchestrated services', img: '/Images/aws.png' },
+  { name: 'HTML', short: 'Orchestrated services', img: '/Images/html.png' },
+  { name: 'CSS', short: 'Orchestrated services', img: '/Images/css.png' },
+  { name: 'Figma', short: 'Orchestrated services', img: '/Images/Figma.png' },
+  { name: 'ChatGPT', short: 'Orchestrated services', img: '/Images/gpt.png' }
+];
+
+// small helper components
+function ServiceCard({ svc, onOpen }: { svc: Service; onOpen: (s: Service) => void }) {
+  return (
+    <article
+      className="bg-white/5 rounded-xl border border-sage-border p-6 flex flex-col h-full hover:shadow-lg transition focus-within:shadow-lg"
+      role="button"
+      tabIndex={0}
+      onClick={() => onOpen(svc)}
+      onKeyDown={(e) => e.key === 'Enter' && onOpen(svc)}
+    >
+      <div className="flex items-start gap-4">
+        <div className="w-14 h-14 rounded-lg flex items-center justify-center bg-gradient-to-r from-sage-accent to-blue-400">
+          <svc.Icon className="w-7 h-7 text-white" />
+        </div>
+        <div className="flex-1">
+          <h3 className="text-xl font-semibold text-sage-text-light">{svc.title}</h3>
+          <p className="text-sage-text mt-2 text-sm">{svc.short}</p>
+        </div>
+      </div>
+
+      <div className="mt-4 mt-auto flex items-center gap-3">
+        <span className="px-2 py-1 rounded-full bg-sage-card text-xs">{svc.price}</span>
+        <span className="text-xs text-sage-text/60">{svc.timeline}</span>
+        <button className="ml-auto inline-flex items-center text-sage-accent text-sm font-medium">
+          Learn more <ArrowRight className="w-4 h-4 ml-2" />
+        </button>
+      </div>
+    </article>
+  );
+}
+
+// Reusable hero-split (video + content). videoOnLeft flips layout.
+function HeroSplit({
+  id,
+  title,
+  subtitle,
+  ctaPath,
+  videoSrc,
+  videoPoster,
+  videoOnLeft = true
+}: {
+  id: string;
+  title: React.ReactNode;
+  subtitle: React.ReactNode;
+  ctaPath?: string;
+  videoSrc: string;
+  videoPoster?: string;
+  videoOnLeft?: boolean;
+}) {
+  return (
+    <section id={id} className="py-12">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-center gap-10">
+        {videoOnLeft && (
+          <div className="lg:w-1/2 w-full flex justify-center">
+            <div className="relative w-full max-w-[780px] rounded-xl overflow-hidden shadow-2xl h-64 lg:h-[360px]">
+              <video
+                className="absolute inset-0 w-full h-full object-cover"
+                autoPlay
+                muted
+                loop
+                playsInline
+                poster={videoPoster || HERO_POSTER}
+                aria-hidden
+              >
+                <source src={videoSrc} type="video/mp4" />
+              </video>
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/10" />
+            </div>
+          </div>
+        )}
+
+        <div className="lg:w-1/2 w-full text-center lg:text-left">
+          <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-sage-accent/10 text-sage-accent border border-sage-accent/20 mb-4">
+            {id.toUpperCase()}
+          </div>
+
+          <h2 className="text-2xl sm:text-3xl font-bold leading-tight">{title}</h2>
+
+          <p className="mt-4 text-sage-text text-base">{subtitle}</p>
+
+          <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
+            <Link to={ctaPath || '/contact'} className="btn-primary inline-flex items-center gap-2 justify-center w-full sm:w-auto">
+              Start a Project <ArrowRight className="w-4 h-4" />
+            </Link>
+            <Link to="/portfolio" className="btn-secondary inline-flex items-center gap-2 justify-center w-full sm:w-auto">
+              View Related Work
+            </Link>
+          </div>
+        </div>
+
+        {!videoOnLeft && (
+          <div className="lg:w-1/2 w-full flex justify-center">
+            <div className="relative w-full max-w-[780px] rounded-xl overflow-hidden shadow-2xl h-64 lg:h-[360px]">
+              <video
+                className="absolute inset-0 w-full h-full object-cover"
+                autoPlay
+                muted
+                loop
+                playsInline
+                poster={videoPoster || HERO_POSTER}
+                aria-hidden
+              >
+                <source src={videoSrc} type="video/mp4" />
+              </video>
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/10" />
+            </div>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+// --- main page
 export default function ServicesInteractive(): JSX.Element {
   const [selected, setSelected] = useState<Service | null>(null);
-  const [expandedFeatureIndexes, setExpandedFeatureIndexes] = useState<Record<string, boolean>>({});
   const navigate = useNavigate();
   const location = useLocation();
   const panelRef = useRef<HTMLDivElement | null>(null);
+  const reduced = useReducedMotion();
 
-  // Open detail panel if URL matches /services/:id
+  // languages interactive preview
+  const [selectedLang, setSelectedLang] = useState<Lang | null>(LANGUAGES[0]);
+
   useEffect(() => {
     const match = location.pathname.match(/\/services\/([^/]+)\/?$/);
     if (match) {
-      const id = match[1];
-      const svc = SERVICES.find((s) => s.id === id);
+      const svc = SERVICES.find((s) => s.id === match[1]);
       if (svc) setSelected(svc);
-    } else {
-      // don't auto-close when route is root of services; keep current selection
     }
   }, [location.pathname]);
 
-  // close on Escape
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        closePanel();
-      }
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, []);
-
-  useEffect(() => {
-    // focus panel when opened
     if (selected && panelRef.current) panelRef.current.focus();
   }, [selected]);
 
   function openPanel(svc: Service) {
     setSelected(svc);
-    // push URL so it's deep-linkable
     navigate(`/services/${svc.id}`, { replace: false });
   }
 
@@ -171,281 +297,403 @@ export default function ServicesInteractive(): JSX.Element {
     navigate('/services', { replace: false });
   }
 
-  function toggleFeature(idx: number) {
-    setExpandedFeatureIndexes((prev) => ({ ...prev, [String(idx)]: !prev[String(idx)] }));
+  const exampleImages = useMemo(
+    () => ({
+      biology: ['/images/biology-sample-1.jpg', '/images/biology-sample-2.jpg'],
+      chemistry: ['/images/chemistry-sample-1.jpg', '/images/chemistry-sample-2.jpg'],
+      physics: ['/images/physics-sample-1.jpg']
+    }),
+    []
+  );
+
+  // helper to detect whether a path is a video (basic extension check)
+  function isVideoPath(path?: string) {
+    if (!path) return false;
+    return /\.(mp4|webm|ogg)$/i.test(path);
   }
 
   return (
-    <div className="pt-16 lg:pt-20">
-      {/* Hero */}
-      <section className="section-padding bg-gradient-to-b from-sage-bg to-sage-deep">
-        <div className="container-custom text-center">
-          <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-sage-accent/10 text-sage-accent border border-sage-accent/20 mb-6">
-            OUR SERVICES
+    <div className="pt-12 lg:pt-20">
+      {/* 1) Primary Hero (original) */}
+      <section className="bg-gradient-to-b from-sage-bg to-sage-deep">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-12 lg:py-20 flex flex-col-reverse lg:flex-row items-center gap-10">
+          <div className="lg:w-1/2 text-center lg:text-left">
+            <div className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-sage-accent/10 text-sage-accent border border-sage-accent/20 mb-4">
+              OUR SERVICES
+            </div>
+
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight">
+              Rapidly Build Scalable<br /> High-Impact Web Apps
+            </h1>
+
+            <p className="mt-4 text-sage-text text-base md:text-lg max-w-xl">
+              We deliver research-grade, AI-powered websites and data portals for biology, chemistry and physics labs — interactive visualizations, reproducible pipelines and secure deployments.
+            </p>
+
+            <div className="mt-6 flex flex-col sm:flex-row gap-3">
+              <Link to="/contact" className="btn-primary inline-flex items-center gap-2 justify-center w-full sm:w-auto">
+                Start a Project
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+              <Link to="/portfolio" className="btn-secondary inline-flex items-center gap-2 justify-center w-full sm:w-auto">
+                View Related Work
+              </Link>
+            </div>
           </div>
-          <h1 className="text-4xl lg:text-6xl font-bold mb-4">AI-Powered Websites for</h1>
-          <h2 className="text-4xl lg:text-6xl gradient-text font-bold mb-6">Biology · Chemistry · Physics</h2>
-          <p className="text-xl text-sage-text max-w-3xl mx-auto mb-8">
-            We integrate modern AI with domain tools used by scientists to deliver interactive,
-            secure and reproducible research platforms.
-          </p>
+
+          <div className="lg:w-1/2 w-full flex justify-center">
+            <div className="relative w-full max-w-[780px] rounded-xl overflow-hidden shadow-2xl h-64 lg:h-[420px]">
+              <video
+                className="absolute inset-0 w-full h-full object-cover"
+                autoPlay
+                muted
+                loop
+                playsInline
+                poster={HERO_POSTER}
+                aria-hidden
+              >
+                <source src="/Videos/ai.mp4" type="video/mp4" />
+              </video>
+
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/10" />
+
+              <div className="relative w-full h-full flex items-center justify-center text-sage-text" />
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Cards + Panel layout */}
-      <section className="section-padding">
-        <div className="container-custom">
-          <div className="grid lg:grid-cols-3 gap-6">
-            {SERVICES.map((svc) => (
-              <div
-                key={svc.id}
-                className="card p-6 rounded-xl border border-sage-border cursor-pointer hover:shadow-xl transition transform hover:-translate-y-1"
-                onClick={() => openPanel(svc)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => e.key === 'Enter' && openPanel(svc)}
-                aria-label={`Open ${svc.title} details`}
-              >
-                <div className="flex items-start gap-4">
-                  <div className="w-14 h-14 rounded-lg flex items-center justify-center bg-gradient-to-r from-sage-accent to-blue-400">
-                    <svc.Icon className="w-7 h-7 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-xl font-bold text-sage-text-light">{svc.title}</h3>
-                    <p className="text-sage-text mt-2">{svc.short}</p>
+      {/* 2) Quick feature highlights (cards row) */}
+      <section className="container-custom py-12">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="p-6 rounded-xl border border-sage-border bg-sage-bg/40">
+              <h4 className="font-semibold text-sage-text-light">Interactive Data Visualizations</h4>
+              <p className="mt-2 text-sage-text text-sm">Dashboards, genome browsers and interactive figures that let researchers explore data fast.</p>
+            </div>
+            <div className="p-6 rounded-xl border border-sage-border bg-sage-bg/40">
+              <h4 className="font-semibold text-sage-text-light">AI-Powered Workflows</h4>
+              <p className="mt-2 text-sage-text text-sm">Model-backed annotations, image analysis and experiment summarization integrated into reproducible pipelines.</p>
+            </div>
+            <div className="p-6 rounded-xl border border-sage-border bg-sage-bg/40">
+              <h4 className="font-semibold text-sage-text-light">Secure & Compliant</h4>
+              <p className="mt-2 text-sage-text text-sm">Role-based access, audit logs and export-safe deployments for research data.</p>
+            </div>
+          </div>
+        </div>
+      </section>
 
-                    <div className="mt-4 flex items-center gap-3">
-                      <span className="px-3 py-1 text-xs bg-sage-card rounded-full">{svc.price}</span>
-                      <span className="text-xs text-sage-text/60">{svc.timeline}</span>
-                      <span className="ml-auto text-sage-accent inline-flex items-center gap-2 font-medium">
-                        Learn more <ArrowRight className="w-4 h-4" />
-                      </span>
-                    </div>
-                  </div>
+      {/* 3) Added hero splits for Chemistry / Biology / Physics */}
+      <HeroSplit
+        id="chemistry"
+        title={<><strong>Chemistry AI</strong><br />Molecular editors & reaction search</>}
+        subtitle="Draw, simulate and query molecules with integrated ML property prediction and spectral tools."
+        videoSrc="/Videos/che.mp4"
+        videoOnLeft={true}
+        ctaPath="/contact?service=chemistry"
+      />
+
+      <HeroSplit
+        id="biology"
+        title={<><strong>Biology AI</strong><br />Genome browsers & notebook workflows</>}
+        subtitle="Explore genomes, annotate experiments and run lightweight in-browser inference for quick insights."
+        videoSrc="/Videos/bio.mp4"
+        videoOnLeft={false}
+        ctaPath="/contact?service=biology"
+      />
+
+      <HeroSplit
+        id="physics"
+        title={<><strong>Physics AI</strong><br />Simulation dashboards & real-time telemetry</>}
+        subtitle="Interactive simulators and anomaly detection pipelines for experimental groups and instrument teams."
+        videoSrc="/Videos/phy.mp4"
+        videoOnLeft={true}
+        ctaPath="/contact?service=physics"
+      />
+
+      {/* 4) Technology / logos grid -> now interactive preview + grid (supports video tags) */}
+      <section className="py-12 container-custom">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <h4 className="text-lg font-semibold text-sage-text-light text-center">Tools & Languages — click to preview</h4>
+          <p className="text-sage-text text-sm mt-2 mb-6 text-center">Click a tag to see a preview area (video or logo). Replace the preview files with your assets when ready.</p>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+            {/* preview area */}
+            <div className="order-2 lg:order-1 bg-sage-bg rounded-xl border border-sage-border p-6 flex flex-col items-center justify-center">
+              <div className="w-full max-w-xs">
+                <div className="w-full h-44 rounded-lg bg-gray-800/20 flex items-center justify-center overflow-hidden">
+                  {/* show selected image or video if available */}
+                  {selectedLang && isVideoPath(selectedLang.img) ? (
+                    <video className="w-full h-full object-cover" src={selectedLang.img} autoPlay muted loop playsInline aria-hidden poster={HERO_POSTER} />
+                  ) : selectedLang?.img ? (
+                    <img src={selectedLang.img} alt={`${selectedLang.name} preview`} className="max-h-full object-contain" />
+                  ) : (
+                    <div className="text-sage-text text-lg">{selectedLang?.name}</div>
+                  )}
                 </div>
+
+                <div className="mt-4 text-center">
+                  <div className="font-semibold text-sage-text-light">{selectedLang?.name}</div>
+                  <div className="text-sage-text text-sm mt-1">{selectedLang?.short}</div>
+                </div>
+              </div>
+            </div>
+
+            {/* languages grid */}
+            <div className="order-1 lg:order-2 lg:col-span-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                {LANGUAGES.map((l) => (
+                  <button
+                    key={l.name}
+                    onClick={() => setSelectedLang(l)}
+                    className={`flex gap-3 items-center p-3 rounded-lg border transition transform hover:-translate-y-0.5 focus:-translate-y-0.5 focus:outline-none ${
+                      selectedLang?.name === l.name ? 'ring-2 ring-sage-accent/40 border-sage-accent/30' : 'border-sage-border/40'
+                    }`}
+                    aria-pressed={selectedLang?.name === l.name}
+                    title={l.short}
+                  >
+                    <div className="w-12 h-12 rounded-md bg-sage-card flex items-center justify-center overflow-hidden">
+                      {isVideoPath(l.img) ? (
+                        <video src={l.img} className="w-full h-full object-cover" autoPlay muted loop playsInline aria-hidden poster={HERO_POSTER} />
+                      ) : l.img ? (
+                        <img src={l.img} alt={`${l.name} logo`} className="w-full h-full object-contain" />
+                      ) : (
+                        <div className="font-semibold">{l.name[0]}</div>
+                      )}
+                    </div>
+                    <div className="text-left">
+                      <div className="font-medium text-sage-text-light">{l.name}</div>
+                      <div className="text-xs text-sage-text mt-1">{l.short}</div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 5) Project case-study grid */}
+      <section className="bg-sage-bg py-12">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <h3 className="text-2xl font-bold text-sage-text-light mb-6">Our Web Application Projects</h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-white/5 rounded-xl border border-sage-border overflow-hidden">
+              <div className="w-full h-48 bg-gray-800/20 flex items-center justify-center text-sage-text overflow-hidden">
+                <img
+                  src="/Images/pro1.png"
+                  alt="Genome Explorer — interactive genome browser screenshot"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="p-6">
+                <h4 className="text-lg font-semibold text-sage-text-light">Genome Explorer</h4>
+                <p className="text-sage-text text-sm mt-2">Interactive genome browser and annotation tools used by research groups to explore sequencing results.</p>
+                <div className="mt-4 flex items-center gap-3">
+                  <span className="px-2 py-1 rounded bg-sage-card text-xs">D3.js</span>
+                  <span className="px-2 py-1 rounded bg-sage-card text-xs">WebGL</span>
+                  <Link to="/portfolio" className="ml-auto text-sage-accent text-sm inline-flex items-center gap-1">View case study <ArrowRight className="w-4 h-4" /></Link>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white/5 rounded-xl border border-sage-border overflow-hidden">
+              <div className="w-full h-48 bg-gray-800/20 flex items-center justify-center text-sage-text overflow-hidden">
+                <img
+                  src="/Images/pro2.png"
+                  alt="Molecular Viewer — 3D molecule viewer screenshot"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="p-6">
+                <h4 className="text-lg font-semibold text-sage-text-light">Molecular Viewer</h4>
+                <p className="text-sage-text text-sm mt-2">3D molecule viewer with annotation, search and integrated ML-based property prediction.</p>
+                <div className="mt-4 flex items-center gap-3">
+                  <span className="px-2 py-1 rounded bg-sage-card text-xs">Three.js</span>
+                  <span className="px-2 py-1 rounded bg-sage-card text-xs">RDKit</span>
+                  <Link to="/portfolio" className="ml-auto text-sage-accent text-sm inline-flex items-center gap-1">View case study <ArrowRight className="w-4 h-4" /></Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 6) Testimonials */}
+      <section className="py-12 container-custom">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <h3 className="text-2xl font-bold text-sage-text-light mb-6 text-center">What our clients say</h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              {
+                quote: 'Sagittarius helped us visualize sequencing results in minutes instead of weeks.',
+                author: 'Dr. Sarah Chen, Stanford'
+              },
+              {
+                quote: 'We reduced manual curation time by 70% with their platform.',
+                author: 'Prof. Michael Rodriguez, MIT'
+              },
+              {
+                quote: 'Secure deployments and reproducible pipelines were game changers for our lab.',
+                author: 'Dr. Lisa Thompson, CERN'
+              }
+            ].map((t, i) => (
+              <div key={i} className="p-6 rounded-xl border border-sage-border bg-sage-bg/20">
+                <p className="text-sage-text">“{t.quote}”</p>
+                <div className="mt-4 font-semibold text-sage-text-light">{t.author}</div>
               </div>
             ))}
           </div>
+        </div>
+      </section>
 
-          {/* Detail panel */}
-          <div className="mt-8">
-            <div
-              className={`relative transition-all duration-400 ${
-                selected ? 'opacity-100 translate-y-0' : 'opacity-0 pointer-events-none -translate-y-4'
-              }`}
+      {/* 7) Blog / resources teaser */}
+      <section className="bg-sage-deep py-12">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <h3 className="text-2xl font-bold text-sage-text-light mb-6">Related Blogs</h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <article className="p-5 rounded-xl border border-sage-border bg-sage-bg/30">
+              <h5 className="font-semibold text-sage-text-light">Designing reproducible data portals</h5>
+              <p className="text-sage-text text-sm mt-2">Principles and patterns for research portals that stand the test of time.</p>
+            </article>
+
+            <article className="p-5 rounded-xl border border-sage-border bg-sage-bg/30">
+              <h5 className="font-semibold text-sage-text-light">Fast ML inference on the web</h5>
+              <p className="text-sage-text text-sm mt-2">Strategies to run and cache lightweight models for interactive UIs.</p>
+            </article>
+
+            <article className="p-5 rounded-xl border border-sage-border bg-sage-bg/30">
+              <h5 className="font-semibold text-sage-text-light">Security & compliance for research apps</h5>
+              <p className="text-sage-text text-sm mt-2">What research teams need to know about access, audit trails and export rules.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      {/* 8) CTA footer */}
+      <section className="py-12 container-custom">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 bg-sage-card rounded-xl p-8 flex flex-col sm:flex-row items-center gap-4">
+          <div>
+            <h4 className="text-xl font-bold text-sage-text-light">Ready to accelerate your research?</h4>
+            <p className="text-sage-text text-sm mt-1">Talk to our team about a pilot project or prototype.</p>
+          </div>
+
+          <div className="ml-auto flex gap-3 w-full sm:w-auto">
+            <Link to="/contact" className="btn-primary w-full sm:w-auto">Request a Demo</Link>
+            <Link to="/portfolio" className="btn-secondary w-full sm:w-auto">View More Work</Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Selected details modal (rendered into document.body to avoid ancestor transform issues) */}
+      {selected &&
+        ReactDOM.createPortal(
+          <AnimatePresence>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[9999]"
+              role="dialog"
+              aria-labelledby={`service-${selected.id}-title`}
             >
-              {selected && (
-                <div
+              {/* backdrop */}
+              <div className="absolute inset-0 bg-black/50" onClick={closePanel} />
+
+              {/* center container */}
+              <div className="absolute inset-0 flex items-center justify-center p-4">
+                <motion.div
+                  initial={{ scale: 0.98, y: 12, opacity: 0 }}
+                  animate={{ scale: 1, y: 0, opacity: 1 }}
+                  exit={{ scale: 0.98, y: 12, opacity: 0 }}
+                  transition={{ duration: reduced ? 0 : 0.18 }}
                   ref={panelRef}
+                  className="w-full max-w-[96vw] sm:max-w-4xl mx-auto bg-sage-bg border border-sage-border rounded-xl shadow-2xl p-3 sm:p-6 max-h-[90vh] overflow-y-auto relative"
                   tabIndex={-1}
-                  className="relative rounded-xl border border-sage-border bg-white/3 p-6 shadow-2xl focus:outline-none"
+                  aria-modal="true"
                 >
+                  {/* Close button */}
                   <button
                     onClick={closePanel}
                     aria-label="Close details"
-                    className="absolute right-4 top-4 p-2 rounded-md hover:bg-white/6"
+                    className="absolute top-3 right-3 p-2.5 rounded-full bg-white/6 text-sage-text-light hover:bg-white/8 focus:outline-none focus:ring-2 focus:ring-sage-accent/40 z-50"
                   >
                     <X className="w-5 h-5" />
                   </button>
 
-                  <div className="grid md:grid-cols-3 gap-6">
-                    {/* Left column: hero image / icon */}
-                    <div className="md:col-span-1 flex flex-col items-center gap-4">
-                      <div className="w-full aspect-video rounded-lg overflow-hidden bg-sage-bg/30">
-                        {/* Replace with real image if available */}
-                        {selected.exampleImage ? (
-                          <img src={selected.exampleImage} alt={selected.title} className="w-full h-full object-cover" />
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <div className="flex-1">
+                      <h3 id={`service-${selected.id}-title`} className="text-xl font-bold text-sage-text-light">
+                        {selected.title}
+                      </h3>
+                      <p className="text-sage-text text-sm mt-2">{selected.short}</p>
+                    </div>
+
+                    {/* copy button removed per request */}
+                  </div>
+
+                  <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <div className="w-full h-48 rounded-lg bg-gray-800/20 flex items-center justify-center overflow-hidden">
+                        {selected.exampleVideo && isVideoPath(selected.exampleVideo) ? (
+                          <video
+                            src={selected.exampleVideo}
+                            className="w-full h-full object-cover"
+                            autoPlay
+                            muted
+                            loop
+                            playsInline
+                            poster={HERO_POSTER}
+                            aria-hidden
+                          />
+                        ) : selected.exampleImage ? (
+                          <img
+                            src={selected.exampleImage}
+                            alt={`${selected.title} example`}
+                            className="w-full h-full object-cover"
+                          />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-sage-text/40">
-                            <selected.Icon className="w-20 h-20" />
-                          </div>
+                          <div className="text-sage-text">Image (add later)</div>
                         )}
-                      </div>
-
-                      <div className="text-center">
-                        <h3 className="text-2xl font-bold text-sage-text-light">{selected.title}</h3>
-                        <p className="text-sage-text mt-2">{selected.short}</p>
-                      </div>
-
-                      <div className="mt-4 w-full">
-                        <div className="flex gap-2 flex-wrap">
-                          {selected.technologies.map((t) => (
-                            <span key={t} className="px-3 py-1 bg-sage-card rounded-full text-sm text-sage-text">
-                              {t}
-                            </span>
-                          ))}
-                        </div>
                       </div>
                     </div>
 
-                    {/* Middle column: core content */}
-                    <div className="md:col-span-2 space-y-4">
-                      <div>
-                        <h4 className="text-lg font-semibold text-sage-text-light">Overview</h4>
-                        <p className="text-sage-text mt-2">{selected.long}</p>
-                      </div>
+                    <div>
+                      <h5 className="font-semibold text-sage-text-light">Overview</h5>
+                      <p className="text-sage-text text-sm mt-2">{selected.long}</p>
 
-                      <div className="grid md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <h5 className="font-semibold text-sage-text-light">AI integrations</h5>
-                          <ul className="space-y-2">
-                            {selected.aiIntegrations.map((a, i) => (
-                              <li key={a} className="flex items-start gap-3">
-                                <div className="mt-1">
-                                  <Zap className="w-4 h-4 text-sage-accent" />
-                                </div>
-                                <div>
-                                  <div className="text-sage-text">{a}</div>
-                                </div>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-
-                        <div className="space-y-2">
-                          <h5 className="font-semibold text-sage-text-light">Use cases</h5>
-                          <ul className="list-disc pl-4 text-sage-text">
-                            {selected.useCases.map((u) => (
-                              <li key={u}>{u}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      </div>
-
-                      <div className="grid md:grid-cols-3 gap-4">
-                        <div>
-                          <h6 className="text-sm font-semibold text-sage-text-light">Data types</h6>
-                          <div className="mt-2 text-sage-text text-sm">
-                            {selected.dataTypes.join(' • ')}
-                          </div>
-                        </div>
-
-                        <div>
-                          <h6 className="text-sm font-semibold text-sage-text-light">Compliance</h6>
-                          <div className="mt-2 text-sage-text text-sm">{selected.compliance.join(' • ')}</div>
-                        </div>
-
-                        <div>
-                          <h6 className="text-sm font-semibold text-sage-text-light">Pricing & timeline</h6>
-                          <div className="mt-2 text-sage-text">
-                            <div className="font-semibold text-sage-accent">{selected.price}</div>
-                            <div className="text-sm text-sage-text/60">{selected.timeline}</div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div>
-                        <h5 className="font-semibold text-sage-text-light">Features</h5>
-                        <div className="mt-3 grid gap-3">
-                          {selected.features.map((f, idx) => (
-                            <div
-                              key={f}
-                              className="p-3 border border-sage-border rounded-lg bg-sage-bg/30 flex items-start justify-between"
-                            >
-                              <div className="flex items-start gap-3">
-                                <Check className="w-4 h-4 text-sage-accent mt-1" />
-                                <div>
-                                  <div className="font-medium text-sage-text-light">{f}</div>
-                                  <div className="text-sm text-sage-text/70">
-                                    {/* short explanatory text — keep small & focused */}
-                                    {f} — we implement this as an interactive, production-ready feature.
-                                  </div>
-                                </div>
-                              </div>
-
-                              <button
-                                onClick={() => toggleFeature(idx)}
-                                className="text-sage-accent text-sm px-2 py-1 rounded hover:bg-white/6"
-                                aria-expanded={!!expandedFeatureIndexes[String(idx)]}
-                              >
-                                {expandedFeatureIndexes[String(idx)] ? 'Hide' : 'Details'}
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Expanded feature details area */}
-                      <div>
-                        {Object.entries(expandedFeatureIndexes).map(([k, v]) =>
-                          v ? (
-                            <div key={k} className="p-4 mt-3 border border-sage-border rounded bg-white/4">
-                              <strong className="text-sage-text-light">Feature details</strong>
-                              <p className="mt-2 text-sage-text">
-                                Example implementation notes and integration patterns that explain how we'd deliver this feature
-                                in a secure, scalable manner (APIs, storage, model hosting, caching).
-                              </p>
-                            </div>
-                          ) : null
-                        )}
-                      </div>
-
-                      <div className="flex items-center gap-4 mt-4">
-                        <Link
-                          to={`/contact?service=${selected.id}`}
-                          className="btn-primary inline-flex items-center gap-2"
-                        >
-                          Start a Project
-                          <ArrowRight className="w-4 h-4" />
-                        </Link>
-
-                        <button
-                          onClick={() => {
-                            // example: open docs or case study
-                            window.open('/portfolio', '_self');
-                          }}
-                          className="btn-secondary inline-flex items-center gap-2"
-                        >
-                          View Related Work
-                        </button>
-                      </div>
+                      <h6 className="mt-4 font-semibold text-sage-text-light">AI integrations</h6>
+                      <ul className="mt-2 text-sage-text text-sm space-y-2">
+                        {selected.aiIntegrations.map((a) => (
+                          <li key={a} className="flex items-start gap-2">
+                            <Zap className="w-4 h-4 text-sage-accent mt-1" />
+                            {a}
+                          </li>
+                        ))}
+                      </ul>
                     </div>
                   </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* Process + CTA */}
-      <section className="section-padding bg-sage-deep">
-        <div className="container-custom">
-          <div className="text-center mb-12">
-            <h3 className="text-3xl font-bold text-sage-text-light">How we deliver</h3>
-            <p className="text-sage-text mt-3 max-w-2xl mx-auto">
-              Discovery → Prototyping → Model Integration → Deployment → Monitoring. We provide research-grade tooling,
-              reproducible pipelines and secure deployments.
-            </p>
-          </div>
+                  <div className="mt-6 flex flex-col sm:flex-row gap-3">
+                    <Link to={`/contact?service=${selected.id}`} className="btn-primary w-full sm:w-auto">
+                      Start Project
+                    </Link>
+                    <Link to="/portfolio" className="btn-secondary w-full sm:w-auto">
+                      View Related Work
+                    </Link>
+                  </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="card p-6 text-center">
-              <div className="w-12 h-12 mx-auto rounded-full bg-gradient-to-r from-sage-accent to-blue-400 flex items-center justify-center mb-4">
-                <Database className="w-5 h-5 text-white" />
+                  <div className="h-4 sm:hidden" aria-hidden />
+                </motion.div>
               </div>
-              <h4 className="font-semibold text-sage-text-light">Data & Storage</h4>
-              <p className="text-sage-text mt-2">Encrypted, versioned storage and fine-grained access control.</p>
-            </div>
+            </motion.div>
+          </AnimatePresence>,
+          document.body
+        )}
 
-            <div className="card p-6 text-center">
-              <div className="w-12 h-12 mx-auto rounded-full bg-gradient-to-r from-sage-accent to-blue-400 flex items-center justify-center mb-4">
-                <Server className="w-5 h-5 text-white" />
-              </div>
-              <h4 className="font-semibold text-sage-text-light">Serving & Models</h4>
-              <p className="text-sage-text mt-2">Model hosting, batching and secure inference endpoints.</p>
-            </div>
-
-            <div className="card p-6 text-center">
-              <div className="w-12 h-12 mx-auto rounded-full bg-gradient-to-r from-sage-accent to-blue-400 flex items-center justify-center mb-4">
-                <Cpu className="w-5 h-5 text-white" />
-              </div>
-              <h4 className="font-semibold text-sage-text-light">Performance</h4>
-              <p className="text-sage-text mt-2">Caching, horizontal scaling and near real-time UX.</p>
-            </div>
-          </div>
-        </div>
-      </section>
     </div>
   );
 }

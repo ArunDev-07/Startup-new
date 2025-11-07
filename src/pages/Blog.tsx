@@ -220,13 +220,13 @@ const Blog: React.FC = () => {
             SAGITTARIUS BLOG
           </div>
 
-          <h1 className="text-4xl lg:text-6xl font-bold mb-6">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
             Insights & Updates from
             <br />
             <span className="gradient-text">Scientific Web Development</span>
           </h1>
 
-          <p className="text-lg text-sage-text max-w-3xl mb-8">
+          <p className="text-base sm:text-lg text-sage-text max-w-3xl mb-8">
             Stay up to date with the latest trends, best practices, and innovations in AI-powered websites for scientific research.
           </p>
         </div>
@@ -235,15 +235,16 @@ const Blog: React.FC = () => {
       {/* Featured + Popular */}
       <section className="section-padding">
         <div className="container-custom">
-          <div className="grid lg:grid-cols-2 gap-8 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
             {/* Left: Large Featured */}
             <div className="rounded-lg border border-sage-border overflow-hidden bg-white/2 shadow-md">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 md:p-6">
                 <div className="aspect-video rounded-lg overflow-hidden">
                   <img
                     src={mainFeatured.image}
                     alt={mainFeatured.title}
                     className="w-full h-full object-cover"
+                    loading="lazy"
                   />
                 </div>
 
@@ -258,7 +259,7 @@ const Blog: React.FC = () => {
                     </div>
                   </div>
 
-                  <h2 className="text-2xl md:text-3xl font-bold mt-4 mb-2 text-sage-text-light">
+                  <h2 className="text-xl md:text-2xl lg:text-3xl font-bold mt-4 mb-2 text-sage-text-light">
                     <Link to={`/blog/${mainFeatured.id}`}>{mainFeatured.title}</Link>
                   </h2>
 
@@ -276,13 +277,13 @@ const Blog: React.FC = () => {
             </div>
 
             {/* Right: Popular Posts list */}
-            <aside>
+            <aside className="order-first lg:order-last">
               <h3 className="text-xl font-semibold mb-6">Popular Posts</h3>
               <div className="space-y-4">
                 {popularPosts.map((p) => (
                   <div key={p.id} className="flex items-start gap-4 p-4 rounded-lg border border-sage-border bg-white/3">
                     <div className="w-20 h-14 flex-shrink-0 rounded-md overflow-hidden">
-                      <img src={p.image} alt={p.title} className="w-full h-full object-cover" />
+                      <img src={p.image} alt={p.title} className="w-full h-full object-cover" loading="lazy" />
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-1">
@@ -304,13 +305,13 @@ const Blog: React.FC = () => {
 
       {/* Filters + Search row */}
       <section className="section-padding pt-6 pb-2">
-        <div className="container-custom flex flex-col lg:flex-row items-center justify-between gap-4">
+        <div className="container-custom flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
           <div className="flex flex-wrap gap-3">
             {categories.map((c) => (
               <button
                 key={c}
                 onClick={() => setActiveCategory(c)}
-                className={`px-4 py-2 rounded-full text-sm transition ${
+                className={`px-3 sm:px-4 py-2 rounded-full text-sm transition whitespace-nowrap ${
                   activeCategory === c
                     ? 'bg-sage-accent/100 text-white shadow-sm'
                     : 'bg-sage-card text-sage-text'
@@ -321,18 +322,19 @@ const Blog: React.FC = () => {
             ))}
           </div>
 
-          <div className="flex items-center gap-3 w-full lg:w-auto">
+          <div className="flex items-center gap-3 w-full lg:w-auto mt-3 lg:mt-0">
             <div className="relative w-full lg:w-72">
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search Articles"
                 className="w-full pl-10 pr-4 py-2 rounded-lg border border-sage-border bg-sage-bg text-sage-text"
+                aria-label="Search articles"
               />
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-sage-text/60" />
             </div>
             <div className="ml-auto lg:ml-0">
-              <button className="px-4 py-2 rounded-lg bg-sage-accent text-white">Filter</button>
+              <button className="px-4 py-2 rounded-lg bg-sage-accent text-white w-full lg:w-auto">Filter</button>
             </div>
           </div>
         </div>
@@ -341,11 +343,16 @@ const Blog: React.FC = () => {
       {/* Grid of posts */}
       <section className="section-padding pb-12">
         <div className="container-custom">
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filtered.map((post) => (
               <article key={post.id} className="card rounded-lg border border-sage-border overflow-hidden bg-white/3 hover:shadow-lg transition">
                 <div className="aspect-video overflow-hidden">
-                  <img src={post.image} alt={post.title} className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" />
+                  <img
+                    src={post.image}
+                    alt={post.title}
+                    className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                    loading="lazy"
+                  />
                 </div>
 
                 <div className="p-5 space-y-3">
@@ -385,26 +392,27 @@ const Blog: React.FC = () => {
       {/* Subscribe Banner */}
       <section className="py-16">
         <div className="container-custom">
-          <div className="rounded-xl overflow-hidden bg-gradient-to-r from-[#081022] via-[#061327] to-[#041826] text-white shadow-lg p-12">
-            <div className="grid md:grid-cols-2 gap-6 items-center">
+          <div className="rounded-xl overflow-hidden bg-gradient-to-r from-[#081022] via-[#061327] to-[#041826] text-white shadow-lg p-6 md:p-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
               <div>
-                <h3 className="text-3xl font-bold mb-2">Subscribe to DataBahn blog!</h3>
+                <h3 className="text-2xl md:text-3xl font-bold mb-2">Subscribe to DataBahn blog!</h3>
                 <p className="text-sage-text/80 mb-6 max-w-xl">
                   Get expert updates on AI-powered data management, security, and automation — straight to your inbox.
                 </p>
               </div>
 
-              <div className="flex items-center gap-3">
+              <form className="flex flex-col sm:flex-row items-stretch gap-3" onSubmit={(e) => e.preventDefault()}>
                 <input
                   type="email"
                   placeholder="Enter your email"
                   className="flex-1 px-4 py-3 rounded-lg text-slate-900"
+                  aria-label="Email address"
                 />
-                <button className="px-5 py-3 rounded-lg bg-sage-accent text-white inline-flex items-center gap-2">
+                <button type="submit" className="px-5 py-3 rounded-lg bg-sage-accent text-white inline-flex items-center gap-2 w-full sm:w-auto justify-center">
                   Subscribe
                   <ArrowRight className="w-4 h-4" />
                 </button>
-              </div>
+              </form>
             </div>
           </div>
         </div>
@@ -413,10 +421,10 @@ const Blog: React.FC = () => {
       {/* Two large tiles like image */}
       <section className="section-padding pb-20">
         <div className="container-custom">
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="rounded-lg overflow-hidden border border-sage-border">
-              <div className="aspect-[3/1] relative overflow-hidden">
-                <img src="https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=1600&h=900" alt="tile-1" className="w-full h-full object-cover" />
+              <div className="aspect-video md:aspect-[3/1] relative overflow-hidden">
+                <img src="https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=1600&h=900" alt="tile-1" className="w-full h-full object-cover" loading="lazy" />
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/40 flex items-end p-6">
                   <h4 className="text-2xl font-bold text-white">The GenAI Enterprise Transformation</h4>
                 </div>
@@ -424,8 +432,8 @@ const Blog: React.FC = () => {
             </div>
 
             <div className="rounded-lg overflow-hidden border border-sage-border">
-              <div className="aspect-[3/1] relative overflow-hidden">
-                <img src="https://images.pexels.com/photos/3183150/pexels-photo-3183150.jpeg?auto=compress&cs=tinysrgb&w=1600&h=900" alt="tile-2" className="w-full h-full object-cover" />
+              <div className="aspect-video md:aspect-[3/1] relative overflow-hidden">
+                <img src="https://images.pexels.com/photos/3183150/pexels-photo-3183150.jpeg?auto=compress&cs=tinysrgb&w=1600&h=900" alt="tile-2" className="w-full h-full object-cover" loading="lazy" />
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/40 flex items-end p-6">
                   <h4 className="text-2xl font-bold text-white">Hybrid Data Pipelines</h4>
                 </div>
@@ -438,10 +446,10 @@ const Blog: React.FC = () => {
       {/* small footer post strip (two columns) */}
       <section className="pb-24">
         <div className="container-custom">
-          <div className="grid md:grid-cols-2 gap-6 items-start">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
             <div className="rounded-lg border border-sage-border p-4 flex items-center gap-4">
-              <div className="w-28 h-16 rounded-md overflow-hidden">
-                <img src="https://images.pexels.com/photos/207983/pexels-photo-207983.jpeg?auto=compress&cs=tinysrgb&w=1600&h=900" alt="f1" className="w-full h-full object-cover" />
+              <div className="w-28 h-16 rounded-md overflow-hidden flex-shrink-0">
+                <img src="https://images.pexels.com/photos/207983/pexels-photo-207983.jpeg?auto=compress&cs=tinysrgb&w=1600&h=900" alt="f1" className="w-full h-full object-cover" loading="lazy" />
               </div>
               <div>
                 <div className="text-xs text-sage-text/60">6 min read</div>
@@ -450,8 +458,8 @@ const Blog: React.FC = () => {
             </div>
 
             <div className="rounded-lg border border-sage-border p-4 flex items-center gap-4">
-              <div className="w-28 h-16 rounded-md overflow-hidden">
-                <img src="https://images.pexels.com/photos/5473952/pexels-photo-5473952.jpeg?auto=compress&cs=tinysrgb&w=1600&h=900" alt="f2" className="w-full h-full object-cover" />
+              <div className="w-28 h-16 rounded-md overflow-hidden flex-shrink-0">
+                <img src="https://images.pexels.com/photos/5473952/pexels-photo-5473952.jpeg?auto=compress&cs=tinysrgb&w=1600&h=900" alt="f2" className="w-full h-full object-cover" loading="lazy" />
               </div>
               <div>
                 <div className="text-xs text-sage-text/60">8 min read</div>

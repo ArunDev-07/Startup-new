@@ -1,3 +1,4 @@
+// File: src/components/Features.tsx
 import React, { useMemo, useState } from 'react';
 import {
   Microscope,
@@ -195,29 +196,29 @@ const Features: React.FC = () => {
             <button className="btn-secondary" onClick={() => setCtaOpen(FEATURES[0])}>Schedule Demo</button>
           </div>
         </div>
-      </div>
 
-      {/* CTA Modal (simple) */}
-      {ctaOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-sage-bg rounded-lg shadow-xl max-w-xl w-full p-6">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <h4 className="text-xl font-bold">{ctaOpen.title}</h4>
-                <p className="text-sage-text mt-2">{ctaOpen.long}</p>
+        {/* CTA Modal (simple) */}
+        {ctaOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <div className="bg-sage-bg rounded-lg shadow-xl max-w-xl w-full p-6">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h4 className="text-xl font-bold">{ctaOpen.title}</h4>
+                  <p className="text-sage-text mt-2">{ctaOpen.long}</p>
+                </div>
+                <button onClick={() => setCtaOpen(null)} className="p-2 rounded-md hover:bg-sage-card">
+                  <XIcon className="w-5 h-5" />
+                </button>
               </div>
-              <button onClick={() => setCtaOpen(null)} className="p-2 rounded-md hover:bg-sage-card">
-                <XIcon className="w-5 h-5" />
-              </button>
-            </div>
 
-            <div className="mt-6 flex gap-3 justify-end">
-              <button className="btn-secondary" onClick={() => setCtaOpen(null)}>Close</button>
-              <a href="#contact" className="btn-primary">Contact Sales</a>
+              <div className="mt-6 flex gap-3 justify-end">
+                <button className="btn-secondary" onClick={() => setCtaOpen(null)}>Close</button>
+                <a href="#contact" className="btn-primary">Contact Sales</a>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </section>
   );
 };

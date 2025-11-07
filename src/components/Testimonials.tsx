@@ -1,3 +1,6 @@
+
+
+// File: src/components/Testimonials.tsx
 import React from 'react';
 import { Quote, Star } from 'lucide-react';
 
